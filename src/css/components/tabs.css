@@ -1,0 +1,49 @@
+/* ═══════════════════════════════════════════
+   Tab Nav — Multi-order tabs (Vitimex POS)
+   ═══════════════════════════════════════════ */
+
+.tab-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 12px; height: 100%; cursor: pointer;
+  border-right: 1px solid #333;
+  color: rgba(255,255,255,0.55);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap; flex-shrink: 0;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  position: relative; user-select: none;
+  min-width: 110px;
+}
+.tab-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
+.tab-item.active {
+  background: var(--color-bg);
+  color: var(--color-text);
+  border-top: 2px solid var(--color-accent);
+  margin-top: 2px;
+}
+.tab-item.active::after {
+  content: ''; display: block;
+  position: absolute; bottom: -1px; left: 0; right: 0;
+  height: 1px; background: var(--color-bg);
+}
+
+.tab-name { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+.tab-close {
+  width: 18px; height: 18px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: transparent;
+  font-size: 0.75rem; color: inherit; opacity: 0.6;
+  transition: background var(--transition-fast);
+  border: none; cursor: pointer;
+}
+.tab-close:hover { background: rgba(255,255,255,0.2); opacity: 1; }
+.tab-item.active .tab-close:hover { background: rgba(0,0,0,0.12); color: var(--color-accent); }
+
+.tab-add {
+  width: 36px; height: 100%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; border: none; cursor: pointer;
+  color: rgba(255,255,255,0.55); font-size: 1.1rem;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.tab-add:hover { background: rgba(255,255,255,0.1); color: #fff; }

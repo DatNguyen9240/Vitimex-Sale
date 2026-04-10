@@ -1,0 +1,89 @@
+/* ═══════════════════════════════════════════
+   Vitimex POS — Standardized Input Components
+   ═══════════════════════════════════════════ */
+
+/* ── Standard Input ──────────────────────── */
+.form-input {
+  width: 100%;
+  padding: 10px 14px;
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  outline: none;
+  box-sizing: border-box;
+  transition: all var(--transition-fast);
+}
+
+.form-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.1);
+}
+
+.form-input::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.6;
+}
+
+/* ── Input with Icon ─────────────────────── */
+.input-icon-wrap {
+  position: relative;
+}
+
+.input-icon-wrap .icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+  display: flex;
+}
+
+.input-icon-wrap .form-input {
+  padding-left: 44px;
+}
+
+/* ── Search Bar ──────────────────────────── */
+.search-bar {
+  position: relative;
+  width: 100%;
+}
+
+.search-bar .search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.search-bar .search-input {
+  width: 100%;
+  padding: 12px 14px 12px 42px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  background: var(--color-surface);
+  transition: all var(--transition-fast);
+}
+
+.search-bar .search-input:focus {
+  border-color: var(--color-accent);
+  background: #fff;
+}
+
+/* ── States ─────────────────────────────── */
+.form-input[readonly],
+.form-input:disabled {
+  background-color: var(--color-surface-muted);
+  cursor: not-allowed;
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+}

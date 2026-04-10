@@ -1,0 +1,89 @@
+/* ═══════════════════════════════════════════
+   Order Table — Product list grid (Vitimex POS)
+   ═══════════════════════════════════════════ */
+
+.order-table {
+  width: 100%; border-collapse: collapse;
+  font-size: var(--font-size-sm);
+  table-layout: auto;
+}
+
+/* ── Header ─────────────────────────────────── */
+.order-table thead th {
+  background: #f0f0f0;
+  border: 1px solid var(--color-border);
+  padding: 6px 8px;
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+  text-align: center;
+  color: var(--color-text-secondary);
+  position: sticky; top: 0; z-index: 2;
+  font-size: var(--font-size-xs);
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.order-table thead th:first-child { text-align: left; width: 36px; }
+
+/* ── Body rows ──────────────────────────────── */
+.order-table tbody tr {
+  border-bottom: 1px solid var(--color-border);
+  transition: background var(--transition-fast);
+}
+.order-table tbody tr:hover { background: #fafafa; }
+.order-table tbody td {
+  padding: 6px 8px; border-right: 1px solid var(--color-border);
+  vertical-align: middle;
+  max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.order-table tbody td:last-child { border-right: none; text-align: right; }
+.order-table tbody td.num { text-align: right; }
+.order-table tbody td.center { text-align: center; }
+
+/* ── Row number + delete ────────────────────── */
+.row-num {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  text-align: center;
+}
+.row-del {
+  background: transparent; border: none; cursor: pointer;
+  color: var(--color-text-muted); font-size: 1rem; padding: 2px 4px;
+  border-radius: var(--radius-sm); transition: color var(--transition-fast), background var(--transition-fast);
+}
+.row-del:hover { color: var(--color-accent); background: var(--color-accent-light); }
+
+/* ── Inline qty input ────────────────────────── */
+.qty-input {
+  width: 54px; padding: 3px 6px; text-align: center;
+  border: 1px solid var(--color-border); border-radius: var(--radius-sm);
+  font-family: var(--font-family); font-size: var(--font-size-sm);
+  outline: none;
+}
+.qty-input:focus { border-color: var(--color-primary); }
+
+/* ── Discount input ──────────────────────────── */
+.disc-input {
+  width: 60px; padding: 3px 6px; text-align: right;
+  border: 1px solid var(--color-border); border-radius: var(--radius-sm);
+  font-family: var(--font-family); font-size: var(--font-size-sm);
+  outline: none;
+}
+.disc-input:focus { border-color: var(--color-primary); }
+
+/* ── Empty state ─────────────────────────────── */
+.order-empty {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 60px 20px; color: var(--color-text-muted);
+  gap: 10px;
+}
+.order-empty .empty-icon { font-size: 3rem; opacity: 0.25; }
+.order-empty .empty-text { font-size: var(--font-size-md); }
+.order-empty .empty-hint { font-size: var(--font-size-sm); opacity: 0.75; }
+
+/* ── Vitimex logo watermark ──────────────────── */
+.pos-watermark {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  pointer-events: none; opacity: 0.04; user-select: none;
+  font-size: 5rem; font-weight: 900; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--color-text);
+}

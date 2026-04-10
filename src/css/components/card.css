@@ -1,0 +1,56 @@
+/* ═══════════════════════════════════════════
+   Vitimex POS — Card Components
+   ═══════════════════════════════════════════ */
+
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: box-shadow var(--transition-normal);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-title {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.card-footer {
+  padding: 12px 20px;
+  background: var(--color-background);
+  border-top: 1px solid var(--color-border);
+}
+
+/* ── Variations ─────────────────────────── */
+.card-flush {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+}
+
+.card-flush .card-body {
+  padding: 0;
+}
+
+.card-accent-top {
+  border-top: 4px solid var(--color-accent);
+}

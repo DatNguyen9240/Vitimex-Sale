@@ -1,0 +1,45 @@
+/* ═══════════════════════════════════════════
+   Vitimex POS — Shared Form Layouts
+   ═══════════════════════════════════════════ */
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.form-field label,
+.form-group label {
+  display: block;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--color-text);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.form-field.has-error .form-input {
+  border-color: var(--color-danger);
+}
+
+.form-field.has-error .error-msg {
+  font-size: 11px;
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+/* ── Utils ──────────────────────────────── */
+.form-utils {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  font-size: 14px;
+}

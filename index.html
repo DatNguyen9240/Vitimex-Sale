@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Vitimex POS — Hệ thống bán hàng</title>
+
+  <!-- ── Auth Middleware — Chặn truy cập trái phép ────────── -->
+  <script src="src/js/config/api.config.js"></script>
+  <script src="src/js/services/auth.service.js"></script>
+  <script src="src/js/middleware/auth.middleware.js"></script>
+  <style>
+    /* Ẩn root cho đến khi check auth xong trong middleware */
+    html { display: none; }
+  </style>
+  <meta name="description" content="Phần mềm bán hàng tại quầy Vitimex - Thời trang Nam chuyên nghiệp">
+  <meta name="theme-color" content="#000000">
+  <link rel="manifest" href="src/pwa/manifest.json">
+  <link rel="apple-touch-icon" href="images/icon-192.png">
+
+  <!-- ── Design System ──────────────────────────────────────── -->
+  <link rel="stylesheet" href="src/css/design-tokens.css">
+  <link rel="stylesheet" href="src/css/global.css">
+  
+  <!-- UI Components (Standardized) -->
+  <link rel="stylesheet" href="src/css/components/loading.css">
+  <link rel="stylesheet" href="src/css/components/input.css">
+  <link rel="stylesheet" href="src/css/components/forms.css">
+  <link rel="stylesheet" href="src/css/components/card.css">
+  
+  <!-- Page Specific Components -->
+  <link rel="stylesheet" href="src/css/components/topbar.css">
+  <link rel="stylesheet" href="src/css/components/tabs.css">
+  <link rel="stylesheet" href="src/css/components/order-table.css">
+  <link rel="stylesheet" href="src/css/components/quick-grid.css">
+  <link rel="stylesheet" href="src/css/components/payment-sidebar.css">
+  <!-- ── Responsive ────────────────────────────── -->
+  <link rel="stylesheet" href="src/css/responsive.css">
+
+  <link rel="stylesheet" href="src/css/responsive.css">
+
+  <!-- ── Cash.js (jQuery-like) ─────────────────────────────── -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cash/8.1.5/cash.min.js"></script>
+</head>
+<body>
+
+<div id="app-shell">
+
+  <!-- ════════════════════════════════════════════════════════
+       TOP BAR
+  ══════════════════════════════════════════════════════════ -->
+  <header id="topbar">
+
+    <!-- Logo -->
+    <div class="topbar-logo">
+      VITIMEX<sup>®</sup>
+    </div>
+
+    <div class="topbar-sep"></div>
+
+    <!-- Search -->
+    <div class="topbar-left">
+      <div class="branch-info">
+        <span class="branch-icon">🏪</span>
+        <span class="branch-name" id="current-branch">Cửa hàng Vitimex Hà Nội</span>
+        <button id="btn-logout" style="background:none; border:1px solid #444; color:#999; 
+          font-size:10px; padding:2px 8px; border-radius:4px; cursor:pointer; margin-left:10px;">
+          ĐĂNG XUẤT
+        </button>
+      </div>
+    </div>
+
+    <div class="topbar-search">
+      <span class="search-icon">🔍</span>
+      <input id="topbar-search-input" type="text" placeholder="Tìm kiếm mặt hàng...">
+      <span class="topbar-shortcut">F1</span>
+    </div>
+
+    <div class="topbar-sep"></div>
+
+    <!-- Channel selector -->
+    <select class="topbar-select" id="channel-select">
+      <option value="offline">🏪 Kênh bán hàng</option>
+      <option value="online">🌐 Online</option>
+      <option value="shopee">📦 Shopee</option>
+    </select>
+
+    <!-- Đổi trả -->
+    <button class="btn" style="background:rgba(255,255,255,0.12);color:#fff;font-size:var(--font-size-xs);padding:5px 10px;border:1px solid rgba(255,255,255,0.2);">
+      🔄 Đổi trả hàng
+    </button>
+
+    <!-- Giá niêm yết -->
+    <select class="topbar-select" id="price-select">
+      <option>Giá niêm yết</option>
+      <option>Giá VIP</option>
+    </select>
+
+    <!-- Staff -->
+    <select class="topbar-select" id="staff-select">
+      <option>🧑‍💼 Admin</option>
+      <option>Nhân viên 1</option>
+      <option>Nhân viên 2</option>
+    </select>
+
+    <!-- Icon buttons -->
+    <div class="topbar-icons">
+      <button class="topbar-icon-btn" title="Kho hàng">📦</button>
+      <button class="topbar-icon-btn" title="Thông báo">
+        🔔
+        <span class="topbar-badge"></span>
+      </button>
+      <button class="topbar-icon-btn" title="Báo cáo">📊</button>
+      <button class="topbar-icon-btn" title="Cài đặt">⚙️</button>
+      <button class="topbar-icon-btn" title="Đăng xuất">🚪</button>
+      <div style="padding:0 6px;font-size:var(--font-size-xs);background:rgba(255,255,255,0.1);
+        border-radius:var(--radius-sm);color:rgba(255,255,255,0.8);" id="clock-display"></div>
+    </div>
+
+  </header>
+
+  <!-- ════════════════════════════════════════════════════════
+       TAB NAV (Multi-order)
+  ══════════════════════════════════════════════════════════ -->
+  <nav id="tab-nav">
+    <!-- Rendered by JS -->
+  </nav>
+
+  <!-- ════════════════════════════════════════════════════════
+       MAIN AREA
+  ══════════════════════════════════════════════════════════ -->
+  <div id="main-area">
+
+    <!-- ── POS Work Area ───────────────────────────────────── -->
+    <div id="pos-area">
+
+      <!-- Order toolbar -->
+      <div style="display:flex;align-items:center;gap:8px;padding:5px 10px;
+        background:var(--color-surface);border-bottom:1px solid var(--color-border);flex-shrink:0;">
+        <button class="btn btn-ghost btn-sm" id="btn-clear-order">🗑️ Xóa đơn</button>
+        <span style="font-size:var(--font-size-xs);color:var(--color-text-muted);">
+          📝 Ghi chú:
+        </span>
+        <input type="text" class="form-input" id="order-note"
+          placeholder="Ghi chú đơn hàng..."
+          style="max-width:200px;font-size:var(--font-size-xs);padding:3px 8px;">
+        <span style="font-size:var(--font-size-xs);color:var(--color-text-muted);margin-left:auto;" id="toolbar-datetime"></span>
+      </div>
+
+      <!-- Product table -->
+      <div id="order-table-wrap">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Quick-select product grid -->
+      <div id="quick-grid">
+        <!-- Rendered by JS -->
+      </div>
+
+    </div>
+
+    <!-- ── Payment Sidebar ─────────────────────────────────── -->
+    <aside id="payment-sidebar">
+      <!-- Rendered by JS -->
+    </aside>
+
+  </div>
+
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- Mobile: Sidebar overlay (backdrop) -->
+<div id="sidebar-overlay"></div>
+
+<!-- Mobile: Floating checkout button (FAB) -->
+<button id="mobile-checkout-fab" style="display:none;">
+  💳 Thanh toán
+  <span class="fab-amount" id="fab-amount">0 ₫</span>
+</button>
+
+<!-- ── JS Config & Services ─────────────────────────────────── -->
+<script src="src/js/utils/format.js"></script>
+<script src="src/js/config/api.config.js"></script>
+<script src="src/js/services/http.service.js"></script>
+<script src="src/js/services/pos.service.js"></script>
+<script src="src/js/services/order-manager.js"></script>
+
+<!-- ── Main App ─────────────────────────────────────────────── -->
+<script src="src/js/app.js"></script>
+
+<!-- ── Clock & misc inline ──────────────────────────────────── -->
+<script>
+  // Live clock
+  function updateClock() {
+    const el = document.getElementById('clock-display');
+    if (el) {
+      const d = new Date();
+      el.textContent = d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+    const tl = document.getElementById('toolbar-datetime');
+    if (tl) {
+      const d = new Date();
+      tl.textContent = d.toLocaleDateString('vi-VN') + ' ' + d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    }
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // ── Mobile: Show/hide FAB + drawer logic ───────────────────────────────────
+  function isMobile() { return window.innerWidth < 768; }
+
+  function openSidebar() {
+    $('#payment-sidebar').addClass('open');
+    $('#sidebar-overlay').addClass('visible');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar() {
+    $('#payment-sidebar').removeClass('open');
+    $('#sidebar-overlay').removeClass('visible');
+    document.body.style.overflow = '';
+  }
+
+  function updateMobileFab() {
+    const fab = document.getElementById('mobile-checkout-fab');
+    if (!fab) return;
+    if (isMobile()) {
+      fab.style.display = 'flex';
+      // sync total amount to FAB
+      try {
+        const order = OrderManager.getActive();
+        const opts = {};
+        const calc = OrderManager.calcOrder(order, opts);
+        document.getElementById('fab-amount').textContent = Fmt.currency(calc.total);
+      } catch(e) {}
+    } else {
+      fab.style.display = 'none';
+      closeSidebar();
+    }
+  }
+
+  // Open drawer on FAB click
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('#mobile-checkout-fab')) openSidebar();
+    if (e.target.id === 'sidebar-overlay') closeSidebar();
+    if (e.target.id === 'btn-checkout') {
+      setTimeout(closeSidebar, 700); // close after checkout
+    }
+  });
+
+  // Touch swipe down to close drawer
+  let _touchStartY = 0;
+  document.getElementById('payment-sidebar').addEventListener('touchstart', function(e) {
+    _touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  document.getElementById('payment-sidebar').addEventListener('touchend', function(e) {
+    const diff = e.changedTouches[0].clientY - _touchStartY;
+    if (diff > 80) closeSidebar();
+  }, { passive: true });
+
+  // Update FAB on resize
+  window.addEventListener('resize', updateMobileFab);
+  // Initial check
+  updateMobileFab();
+
+  // Sync FAB amount whenever totals update
+  document.addEventListener('vitimex:fab-update', function(e) {
+    const el = document.getElementById('fab-amount');
+    if (el && e.detail) el.textContent = e.detail.total;
+  });
+
+  // ── Clear order ─────────────────────────────────────────────────────────────
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('#btn-clear-order')) {
+      const order = OrderManager.getActive();
+      if (order.items.length === 0) return;
+      if (confirm('Xóa toàn bộ sản phẩm trong đơn hàng?')) {
+        order.items = [];
+        order.payments = [{ methodId: 'TIENMAT', amount: 0 }];
+        document.dispatchEvent(new CustomEvent('vitimex:rerender'));
+        updateMobileFab();
+      }
+    }
+  });
+</script>
+
+<!-- ── PWA Registration ─────────────────────────────────────── -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(r => console.log('[PWA] SW registered, scope:', r.scope))
+        .catch(e => console.warn('[PWA] SW failed:', e));
+    });
+  }
+</script>
+
+</body>
+</html>

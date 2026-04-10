@@ -1,0 +1,110 @@
+/* ═══════════════════════════════════════════
+   Quick Product Grid (Vitimex POS)
+   Bottom panel — fast product selection
+   ═══════════════════════════════════════════ */
+
+.quick-grid-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px; background: #f8f8f8;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+.quick-grid-header .pg-info {
+  display: flex; align-items: center; gap: 4px;
+  color: var(--color-text-muted); font-size: var(--font-size-xs);
+  margin-left: auto;
+}
+.pg-btn {
+  width: 26px; height: 26px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  cursor: pointer; font-size: 0.85rem; color: var(--color-text-muted);
+  transition: all var(--transition-fast);
+}
+.pg-btn:hover:not(:disabled) { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+.pg-btn:disabled { opacity: 0.35; cursor: default; }
+
+.quick-grid-body {
+  flex: 1; overflow: hidden;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(2, 1fr);
+  gap: 0;
+  padding: 6px; gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.quick-grid-body::-webkit-scrollbar { display: none; }
+
+/* ── Product Card ──────────────────────────── */
+.product-card {
+  width: 110px; flex-shrink: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden; cursor: pointer;
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+  display: flex; flex-direction: column;
+  position: relative;
+}
+.product-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+  transform: translateY(-1px);
+}
+.product-card:active { transform: scale(0.98); }
+
+.product-card-img {
+  width: 100%; aspect-ratio: 1;
+  object-fit: cover; display: block;
+  background: #f5f5f5;
+}
+.product-card-img-placeholder {
+  width: 100%; aspect-ratio: 1;
+  background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
+  display: flex; align-items: center; justify-content: center;
+  color: #bbb; font-size: 1.5rem;
+}
+
+.product-card-info {
+  padding: 4px 6px; flex: 1;
+  display: flex; flex-direction: column; gap: 1px;
+}
+.product-card-name {
+  font-size: var(--font-size-xs); font-weight: var(--font-weight-medium);
+  color: var(--color-text); line-height: 1.3;
+  overflow: hidden; text-overflow: ellipsis;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.product-card-price {
+  font-size: var(--font-size-xs); font-weight: var(--font-weight-bold);
+  color: var(--color-accent);
+}
+
+/* ── Size selector on card ─────────────────── */
+.product-card-sizes {
+  display: flex; flex-wrap: wrap; gap: 2px;
+  padding: 3px 6px 5px;
+}
+.size-btn {
+  padding: 1px 5px; font-size: 0.65rem;
+  font-weight: var(--font-weight-semibold);
+  border: 1px solid var(--color-border);
+  border-radius: 3px; background: transparent;
+  cursor: pointer; color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+}
+.size-btn:hover {
+  background: var(--color-primary); color: #fff; border-color: var(--color-primary);
+}
+.size-btn.out-of-stock {
+  opacity: 0.35; cursor: not-allowed; text-decoration: line-through;
+}
+
+/* ── Stock badge ─────────────────────────── */
+.product-card-badge {
+  position: absolute; top: 4px; right: 4px;
+  background: var(--color-accent); color: #fff;
+  font-size: 0.6rem; font-weight: 700;
+  padding: 1px 5px; border-radius: var(--radius-full);
+}
