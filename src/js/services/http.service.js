@@ -17,8 +17,8 @@ window.HttpService = (function () {
    * @param {object} params - Parameters object
    */
   async function execute(endpoint, params = {}) {
-    const isLogin = endpoint === window.API_CONFIG.METHODS.LOGIN;
-    const url = isLogin 
+    const isDirectApi = endpoint.startsWith('/');
+    const url = isDirectApi 
       ? `${window.API_CONFIG.BASE_URL}${endpoint}`
       : `${window.API_CONFIG.BASE_URL}/execute`;
     
@@ -30,7 +30,7 @@ window.HttpService = (function () {
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
-        body: JSON.stringify(isLogin ? params : {
+        body: JSON.stringify(isDirectApi ? params : {
           procName: endpoint,
           params: params
         })

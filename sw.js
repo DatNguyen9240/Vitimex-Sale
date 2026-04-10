@@ -3,7 +3,7 @@
  * Cache-first cho static assets, network-first cho API.
  * Tăng CACHE_VERSION khi deploy phiên bản mới.
  */
-const CACHE_VERSION = 'vitimex-pos-v1';
+const CACHE_VERSION = 'vitimex-pos-v2';
 
 const PRECACHE_URLS = [
   '/',

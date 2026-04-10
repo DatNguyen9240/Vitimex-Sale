@@ -20,7 +20,6 @@ $(function () {
 
   // ── Customer search dropdown ─────────────────────────────────────────────
   let _customerDropdownVisible = false;
-  let _paymentMethods = []; // Loaded async
   let _orderStatuses = [];  // Loaded async
 
   // ── Initialization ───────────────────────────────────────────────────────
@@ -30,18 +29,25 @@ $(function () {
       loadProducts(),
       loadMetadata()
     ]);
+    
+    // Render user info
+    const user = AuthService.getUser();
+    if (user && user.displayName) {
+      $('#current-branch').after(`
+        <div class="topbar-user" style="display:flex; align-items:center; gap:6px; margin-left:12px; color:rgba(255,255,255,0.7); font-size:12px;">
+          <span style="opacity:0.5;">|</span>
+          <span>👤 ${user.displayName}</span>
+        </div>
+      `);
+    }
+
     renderAll();
     console.log('[Vitimex POS] App initialized with LIVE API ✓');
   }
 
   async function loadMetadata() {
     try {
-      const [methods, statuses] = await Promise.all([
-        PosService.getPaymentMethods(),
-        PosService.getOrderStatuses()
-      ]);
-      _paymentMethods = methods;
-      _orderStatuses = statuses;
+      _orderStatuses = await PosService.getOrderStatuses();
     } catch (e) {
       console.error('[App] Failed to load metadata:', e);
     }
@@ -505,7 +511,8 @@ $(function () {
 
   // ── Order status ───────────────────────────────────────────────────────────
   $(document).on('change', '#order-status', function () {
-    OrderManager.getActive().status = $(this).val();
+    const order = OrderManager.getActive();
+    if (order) order.status = $(this).val();
   });
 
   // ── Bill inputs ────────────────────────────────────────────────────────────
@@ -597,9 +604,22 @@ $(function () {
 
   // ── Logout ─────────────────────────────────────────────────────────────────
   $(document).on('click', '#btn-logout', function () {
-    if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
-      AuthService.logout();
-    }
+    Swal.fire({
+      title: 'Xác nhận đăng xuất?',
+      text: "Phiên làm việc của bạn sẽ kết thúc.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#C42027',
+      cancelButtonColor: '#444',
+      confirmButtonText: 'Đăng xuất ngay',
+      cancelButtonText: 'Hủy',
+      background: 'var(--color-surface)',
+      color: 'var(--color-text)'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        AuthService.logout();
+      }
+    });
   });
 
   // ── Print ──────────────────────────────────────────────────────────────────

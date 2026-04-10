@@ -95,5 +95,34 @@ BEGIN
 END
 GO
 
+-- 9. API Lấy danh sách Hóa đơn (Sale Out)
+CREATE OR ALTER PROCEDURE API_POS_LayDanhSachBill
+    @ChiNhanhID NVARCHAR(50),
+    @TuKhoaTimKiem NVARCHAR(100) = '',
+    @TuNgay DATETIME = NULL,
+    @DenNgay DATETIME = NULL,
+    @NhanVienID NVARCHAR(50) = '',
+    @TrangThai NVARCHAR(50) = ''
+AS
+BEGIN
+    SELECT 
+        I.InvoiceID, 
+        I.DocumentDate, 
+        I.ObjectName, 
+        I.TotalAmount, 
+        E.EmployeeName, 
+        I.Status AS StatusName
+    FROM InvoiceTbl I
+    LEFT JOIN CF_EmployeeTbl E ON I.EmployeeID = E.EmployeeID
+    WHERE I.BranchID = @ChiNhanhID
+      AND (@TuKhoaTimKiem = '' OR I.InvoiceID LIKE '%' + @TuKhoaTimKiem + '%' OR I.ObjectName LIKE '%' + @TuKhoaTimKiem + '%')
+      AND (@TuNgay IS NULL OR I.DocumentDate >= @TuNgay)
+      AND (@DenNgay IS NULL OR I.DocumentDate <= @DenNgay)
+      AND (@NhanVienID = '' OR I.EmployeeID = @NhanVienID)
+      AND (@TrangThai = '' OR I.Status = @TrangThai)
+    ORDER BY I.DocumentDate DESC
+END
+GO
+
 PRINT N'✅ Đã khởi tạo các Stored Procedures POS với tên Tiếng Việt';
 GO

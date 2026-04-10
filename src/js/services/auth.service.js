@@ -61,10 +61,17 @@ window.AuthService = (function () {
   }
 
   /** Đăng xuất */
-  function logout() {
-    deleteCookie('auth_token');
-    localStorage.removeItem('auth_user');
-    window.location.href = 'login.html';
+  async function logout() {
+    try {
+      // Gọi API logout để Backend hủy token/session (nếu cần)
+      await HttpService.execute(window.API_CONFIG.METHODS.LOGOUT);
+    } catch (e) {
+      console.warn('[AuthService] API Logout failed, but clearing local session anyway.');
+    } finally {
+      deleteCookie('auth_token');
+      localStorage.removeItem('auth_user');
+      window.location.href = 'login.html';
+    }
   }
 
   /** Kiểm tra đã đăng nhập chưa */

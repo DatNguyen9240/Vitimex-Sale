@@ -96,16 +96,6 @@ window.PosService = (function () {
     });
   }
 
-  /** Get payment methods */
-  async function getPaymentMethods() {
-    try {
-      const res = await HttpService.execute(METHODS.GET_PAYMENT_METHODS);
-      return res.data || [];
-    } catch (e) {
-      return [{ id: 'TIENMAT', name: 'Tiền mặt' }];
-    }
-  }
-
   /** Get order statuses */
   async function getOrderStatuses() {
     try {
@@ -122,7 +112,6 @@ window.PosService = (function () {
     getBranches,
     getEmployees,
     saveOrder,
-    getPaymentMethods,
     getOrderStatuses
   };
 })();
