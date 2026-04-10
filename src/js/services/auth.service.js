@@ -1,13 +1,11 @@
 /**
- * AuthService — Quản lý đăng nhập và phiên làm việc
- * Dựa trên cấu trúc Medstand, sử dụng Cookie để lưu Token.
+ * AuthService — Vitimex POS (Medstand Pattern)
+ * Quản lý đăng nhập, phiên làm việc và hiển thị thông tin người dùng.
  */
-window.AuthService = (function () {
-  'use strict';
+const AuthService = (() => {
+  const EP = window.API_CONFIG.ENDPOINTS.AUTH;
 
-  const LOGIN_ENDPOINT = window.API_CONFIG.METHODS.LOGIN;
-
-  // ── Cookie Helpers ──────────────────────────────────────────────────────
+  // ── Cookie helpers ──────────────────────────────────────────────────────
   function setCookie(name, value, days) {
     const expires = new Date(Date.now() + days * 864e5).toUTCString();
     document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires};path=/;SameSite=Strict`;
@@ -25,37 +23,57 @@ window.AuthService = (function () {
   // ── Public API ──────────────────────────────────────────────────────────
 
   /**
-   * Đăng nhập vào hệ thống
+   * Đăng nhập
    * @param {string} username 
    * @param {string} password 
    */
   async function login(username, password) {
+    console.log('[Auth] Login attempt:', username);
     try {
-      const data = await HttpService.execute(LOGIN_ENDPOINT, { username, password });
-
-      // Check code === 0 (Success theo đúng dữ liệu bạn gửi)
+      const data = await Http.post(EP.LOGIN, { username, password });
+      
       if (data && data.code === 0) {
-        const token = data.access_token;
-        
-        // Lưu toàn bộ thông tin User trả về từ API
-        const user = {
-          userName: data.UserName,
-          displayName: data.DisplayName,
-          branchId: data.BranchID,
-          group: data.Group,
-          employeeId: data.EmployeeID
-        };
-
+        const token = data.access_token || '';
         if (token) setCookie('auth_token', token, 7); 
-        localStorage.setItem('auth_user', JSON.stringify(user));
-        
-        console.log('[AuthService] Login success. User:', user.displayName);
+
+        // Lưu thông tin cơ bản trước
+        const basicUser = {
+          UserName: data.UserName || username,
+          DisplayName: data.DisplayName || username,
+          BranchID: data.BranchID || ''
+        };
+        localStorage.setItem('auth_user', JSON.stringify(basicUser));
+
+        // Gọi API lấy thông tin chi tiết (UserInfo SP) thông qua GET
+        try {
+          const infoRes = await Http.get(EP.USER_INFO);
+          const rows = infoRes.data || infoRes.records || [];
+          if (infoRes && infoRes.code === 0 && rows.length > 0) {
+             // Tìm đúng bản ghi của user hiện tại
+             const detailedUser = rows.find(u => 
+               (u.UserName || u.Username || '').toLowerCase() === username.toLowerCase()
+             );
+             
+             if (detailedUser) {
+               localStorage.setItem('auth_user', JSON.stringify({
+                 ...basicUser,
+                 ...detailedUser,
+                 DisplayName: detailedUser.HoTen || detailedUser.DisplayName || basicUser.DisplayName,
+                 BranchID: detailedUser.BranchID || basicUser.BranchID
+               }));
+             }
+          }
+        } catch (infoErr) {
+          console.warn('[Auth] Could not fetch detailed user info, using basic session data.');
+        }
+
+        console.log('[Auth] Login success. User:', username);
         return data;
       } else {
         throw new Error(data.msg || 'Tài khoản hoặc mật khẩu không chính xác');
       }
     } catch (e) {
-      console.error('[AuthService] Login error:', e);
+      console.error('[Auth] Login error:', e);
       throw e;
     }
   }
@@ -63,10 +81,7 @@ window.AuthService = (function () {
   /** Đăng xuất */
   async function logout() {
     try {
-      // Gọi API logout để Backend hủy token/session (nếu cần)
-      await HttpService.execute(window.API_CONFIG.METHODS.LOGOUT);
-    } catch (e) {
-      console.warn('[AuthService] API Logout failed, but clearing local session anyway.');
+      await Http.post(EP.LOGOUT);
     } finally {
       deleteCookie('auth_token');
       localStorage.removeItem('auth_user');
@@ -88,10 +103,29 @@ window.AuthService = (function () {
     }
   }
 
+  /** 
+   * Đồng bộ hiển thị thông tin người dùng lên topbar 
+   * @param {string} nameSelector 
+   */
+  function syncUserDisplay(nameSelector) {
+    try {
+      const user = getUser();
+      if (user.DisplayName && nameSelector) {
+        // Rút gọn tên: "Nguyễn Văn Admin" -> "Văn Admin"
+        const words = user.DisplayName.trim().split(/\s+/);
+        const display = words.length <= 2 ? user.DisplayName : words.slice(-2).join(' ');
+        $(nameSelector).text(display);
+      }
+    } catch (e) {
+      console.error('[Auth] Failed to sync user display:', e);
+    }
+  }
+
   return {
     login,
     logout,
     isAuthenticated,
-    getUser
+    getUser,
+    syncUserDisplay
   };
 })();

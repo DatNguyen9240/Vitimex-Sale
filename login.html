@@ -20,6 +20,11 @@
 </head>
 <body class="auth-page">
 
+  <!-- Global Spinner (Medstand Pattern) -->
+  <div id="global-spinner" class="loading-spinner" hidden aria-live="polite">
+    <div class="spinner-dot"></div>
+  </div>
+
   <div class="auth-container">
     <div class="auth-card card">
       <div class="auth-header">
@@ -74,6 +79,26 @@
     </div>
   </div>
 
+  <!-- Minimal JS: spinner inline (no dep on LoadingSpinner.js) -->
+  <script>
+    var $spinner = document.getElementById('global-spinner');
+    var _spinnerCount = 0;
+    function showGlobalSpinner() { 
+      _spinnerCount++; 
+      console.log('[Spinner] SHOW | Counter:', _spinnerCount);
+      $spinner.removeAttribute('hidden'); 
+      $spinner.style.display = 'flex';
+    }
+    function hideGlobalSpinner() { 
+      _spinnerCount = Math.max(0, _spinnerCount - 1); 
+      console.log('[Spinner] HIDE | Counter:', _spinnerCount);
+      if (_spinnerCount === 0) {
+        $spinner.setAttribute('hidden', ''); 
+        $spinner.style.display = 'none';
+      }
+    }
+  </script>
+  <script src="src/js/components/Alert.js"></script>
   <script src="src/js/config/api.config.js"></script>
   <script src="src/js/services/http.service.js"></script>
   <script src="src/js/services/auth.service.js"></script>

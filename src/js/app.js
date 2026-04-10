@@ -20,7 +20,20 @@ $(function () {
 
   // ── Customer search dropdown ─────────────────────────────────────────────
   let _customerDropdownVisible = false;
-  let _orderStatuses = [];  // Loaded async
+  let _orderStatuses = [];  
+  let _paymentMethods = []; 
+
+  // ── View Options per tab ─────────────────────────────────────────────────
+  // Stores { orderDisc, service, vat } per orderId
+  const _displayOpts = {}; 
+
+  /** Helper to get display options for an order */
+  function getOpts(id) {
+    if (!_displayOpts[id]) {
+      _displayOpts[id] = { orderDisc: 0, service: 0, vat: 0 };
+    }
+    return _displayOpts[id];
+  }
 
   // ── Initialization ───────────────────────────────────────────────────────
   async function init() {
@@ -28,18 +41,13 @@ $(function () {
     await Promise.all([
       loadProducts(),
       loadMetadata()
-    ]);
+    ]).catch(err => {
+      console.error('[App] Initialization error:', err);
+    });
     
-    // Render user info
-    const user = AuthService.getUser();
-    if (user && user.displayName) {
-      $('#current-branch').after(`
-        <div class="topbar-user" style="display:flex; align-items:center; gap:6px; margin-left:12px; color:rgba(255,255,255,0.7); font-size:12px;">
-          <span style="opacity:0.5;">|</span>
-          <span>👤 ${user.displayName}</span>
-        </div>
-      `);
-    }
+    // Sync user info to UI (Medstand Pattern)
+    AuthService.syncUserDisplay('#current-branch');
+    $('.branch-icon').text('👤');
 
     renderAll();
     console.log('[Vitimex POS] App initialized with LIVE API ✓');
@@ -47,7 +55,12 @@ $(function () {
 
   async function loadMetadata() {
     try {
-      _orderStatuses = await PosService.getOrderStatuses();
+      const [statuses, methods] = await Promise.all([
+        PosService.getOrderStatuses(),
+        PosService.getPaymentMethods()
+      ]);
+      _orderStatuses = statuses;
+      _paymentMethods = methods;
     } catch (e) {
       console.error('[App] Failed to load metadata:', e);
     }
@@ -290,24 +303,26 @@ $(function () {
       </div>`);
   }
 
-  if (_isLoadingQuick) {
-    $('#quick-grid').html('<div class="quick-grid-loader">⏳ Đang tải hàng hóa...</div>');
-    return;
-  }
+  /** Render quick-select product grid */
+  function renderQuickGrid() {
+    if (_isLoadingQuick) {
+      $('#quick-grid').html('<div class="quick-grid-loader">⏳ Đang tải hàng hóa...</div>');
+      return;
+    }
 
-  const start = _quickPage * QUICK_PAGE_SIZE;
-  const pageProducts = _quickProducts.slice(start, start + QUICK_PAGE_SIZE);
-  const totalPages = Math.max(1, Math.ceil(_quickProducts.length / QUICK_PAGE_SIZE));
+    const start = _quickPage * QUICK_PAGE_SIZE;
+    const pageProducts = _quickProducts.slice(start, start + QUICK_PAGE_SIZE);
+    const totalPages = Math.max(1, Math.ceil(_quickProducts.length / QUICK_PAGE_SIZE));
 
-  const cards = pageProducts.map(p => {
-    const sizeBtns = p.sizes.map(s =>
-      `<button class="size-btn" data-product-id="${p.id}" data-size="${s}">${s}</button>`
-    ).join('');
-    const imgHtml = p.img
-      ? `<img class="product-card-img" src="${p.img}" alt="${p.name}" loading="lazy">`
-      : `<div class="product-card-img-placeholder">👔</div>`;
+    const cards = pageProducts.map(p => {
+      const sizeBtns = p.sizes.map(s =>
+        `<button class="size-btn" data-product-id="${p.id}" data-size="${s}">${s}</button>`
+      ).join('');
+      const imgHtml = p.img
+        ? `<img class="product-card-img" src="${p.img}" alt="${p.name}" loading="lazy">`
+        : `<div class="product-card-img-placeholder">👔</div>`;
 
-    return `
+      return `
         <div class="product-card" data-product-id="${p.id}">
           ${p.hot ? '<span class="product-card-badge">HOT</span>' : ''}
           ${imgHtml}
@@ -317,9 +332,9 @@ $(function () {
           </div>
           <div class="product-card-sizes">${sizeBtns}</div>
         </div>`;
-  }).join('');
+    }).join('');
 
-  $('#quick-grid').html(`
+    $('#quick-grid').html(`
       <div class="quick-grid-header">
         <span style="font-size:var(--font-size-xs);color:var(--color-text-muted);font-weight:600;">
           ⚡ SẢN PHẨM BÁN NHANH
@@ -332,6 +347,7 @@ $(function () {
         </div>
       </div>
       <div class="quick-grid-body">${cards}</div>`);
+  }
 
 
   /** Full re-render everything */

@@ -5,16 +5,18 @@
 window.PosService = (function () {
   'use strict';
 
-  const METHODS = window.API_CONFIG.METHODS;
+  const EP = window.API_CONFIG.ENDPOINTS.POS;
 
   /** Search products from SQL */
   async function searchProducts(searchTerm = '', branchId = 'HN01') {
+    const user = AuthService.getUser();
     try {
-      const res = await HttpService.execute(METHODS.SEARCH_ITEMS, {
-        ChiNhanhID: branchId,
+      const res = await Http.post(EP.SEARCH_ITEMS, {
+        ChiNhanhID: user.BranchID || branchId || 'HN01',
+        UserName: user.UserName || 'admin',
         TuKhoaTimKiem: searchTerm
       });
-      const rows = res.data || [];
+      const rows = res.data || res.records || [];
 
       // Map SQL rows to UI product objects
       return rows.map(r => ({
@@ -36,8 +38,8 @@ window.PosService = (function () {
   /** Get customers from SQL */
   async function getCustomers() {
     try {
-      const res = await HttpService.execute(METHODS.GET_CUSTOMERS);
-      const rows = res.data || [];
+      const res = await Http.get(EP.GET_CUSTOMERS);
+      const rows = res.data || res.records || [];
       return rows.map(r => ({
         id: r.ObjectID,
         name: r.ObjectName,
@@ -50,10 +52,13 @@ window.PosService = (function () {
   }
 
   /** Get branches */
-  async function getBranches(userName = '') {
+  async function getBranches() {
+    const user = AuthService.getUser();
     try {
-      const res = await HttpService.execute(METHODS.GET_BRANCHES, { UserName: userName });
-      return res.data || [];
+      const res = await Http.get(EP.GET_BRANCHES, { 
+        UserName: user.UserName || 'admin' 
+      });
+      return res.data || res.records || [];
     } catch (e) {
       return [];
     }
@@ -62,8 +67,8 @@ window.PosService = (function () {
   /** Get employees */
   async function getEmployees() {
     try {
-      const res = await HttpService.execute(METHODS.GET_EMPLOYEES);
-      return res.data || [];
+      const res = await Http.get(EP.GET_EMPLOYEES);
+      return res.data || res.records || [];
     } catch (e) {
       return [];
     }
@@ -91,7 +96,7 @@ window.PosService = (function () {
       payments: order.payments
     };
 
-    return await HttpService.execute(METHODS.SAVE_ORDER, {
+    return await Http.post(EP.SAVE_ORDER, {
       DuLieuDonHang: JSON.stringify(payload)
     });
   }
@@ -99,10 +104,28 @@ window.PosService = (function () {
   /** Get order statuses */
   async function getOrderStatuses() {
     try {
-      const res = await HttpService.execute(METHODS.GET_ORDER_STATUSES);
-      return res.data || [];
+      const res = await Http.get(EP.GET_ORDER_STATUSES);
+      const rows = res.data || res.records || [];
+      return rows.map(r => ({
+        id: r.id || r.ID || '',
+        name: r.name || r.Name || ''
+      }));
     } catch (e) {
       return [{ id: 'HOAN_THANH', name: 'Hoàn thành' }];
+    }
+  }
+
+  /** Get payment methods */
+  async function getPaymentMethods() {
+    try {
+      const res = await Http.get(EP.GET_PAYMENT_METHODS);
+      const rows = res.data || res.records || [];
+      return rows.map(r => ({
+        id: r.id || r.ID || '',
+        name: r.name || r.Name || ''
+      }));
+    } catch (e) {
+      return [{ id: 'TIENMAT', name: 'Tiền mặt' }];
     }
   }
 
@@ -112,6 +135,7 @@ window.PosService = (function () {
     getBranches,
     getEmployees,
     saveOrder,
-    getOrderStatuses
+    getOrderStatuses,
+    getPaymentMethods
   };
 })();

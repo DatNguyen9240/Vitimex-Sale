@@ -39,10 +39,10 @@
   <link rel="stylesheet" href="src/css/components/payment-sidebar.css">
   <!-- ── Responsive ────────────────────────────── -->
   <link rel="stylesheet" href="src/css/responsive.css">
-  
+
   <!-- UI Core Components -->
   <link rel="stylesheet" href="src/css/components/modal.css">
-  
+
   <!-- SweetAlert2 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -51,6 +51,11 @@
 </head>
 
 <body>
+
+  <!-- Global Spinner (Medstand Pattern) -->
+  <div id="global-spinner" class="loading-spinner" hidden aria-live="polite">
+    <div class="spinner-dot"></div>
+  </div>
 
   <div id="app-shell">
 
@@ -66,10 +71,10 @@
 
       <div class="topbar-sep"></div>
 
-    <div class="topbar-left">
+      <div class="topbar-left">
         <div class="branch-info">
-          <span class="branch-icon">🏪</span>
-          <span class="branch-name" id="current-branch">Cửa hàng Vitimex Hà Nội</span>
+          <span class="branch-icon">👤</span>
+          <span class="branch-name" id="current-branch">Đang tải...</span>
           <button id="btn-logout" style="background:none; border:1px solid #444; color:#999; 
           font-size:10px; padding:2px 8px; border-radius:4px; cursor:pointer; margin-left:10px;">
             ĐĂNG XUẤT
@@ -191,6 +196,8 @@
   <!-- ── JS Config & Services ─────────────────────────────────── -->
   <script src="src/js/utils/format.js"></script>
   <script src="src/js/utils/modal-helper.js"></script>
+  <script src="src/js/components/LoadingSpinner.js"></script>
+  <script src="src/js/components/Alert.js"></script>
   <script src="src/js/config/api.config.js"></script>
   <script src="src/js/services/http.service.js"></script>
   <script src="src/js/services/pos.service.js"></script>
