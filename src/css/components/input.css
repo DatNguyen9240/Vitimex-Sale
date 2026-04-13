@@ -5,7 +5,7 @@
 /* ── Standard Input ──────────────────────── */
 .form-input {
   width: 100%;
-  padding: 10px 14px;
+  padding: 12px 18px;
   font-family: var(--font-family);
   font-size: var(--font-size-sm);
   color: var(--color-text);
@@ -76,7 +76,7 @@
 
 .search-bar .search-input:focus {
   border-color: var(--color-accent);
-  background: #fff;
+  background: var(--color-surface);
 }
 
 /* ── States ─────────────────────────────── */

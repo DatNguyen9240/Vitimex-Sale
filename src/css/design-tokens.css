@@ -7,78 +7,115 @@
 
 :root {
   /* ── Brand Colors ─────────────────── */
-  --color-primary:        #000000;
-  --color-primary-hover:  #1a1a1a;
-  --color-primary-rgb:    0, 0, 0;
+  --color-primary: #000000;
+  --color-primary-hover: #1a1a1a;
+  --color-primary-rgb: 0, 0, 0;
 
-  --color-accent:         #C42027;
-  --color-accent-hover:   #a51b21;
-  --color-accent-light:   #fdf2f2;
-  --color-accent-rgb:     196, 32, 39;
+  --color-accent: #C42027;
+  --color-accent-hover: #a51b21;
+  --color-accent-light: #fdf2f2;
+  --color-accent-rgb: 196, 32, 39;
 
   /* ── Status ───────────────────────── */
-  --color-success:        #16a34a;
-  --color-warning:        #d97706;
-  --color-danger:         #C42027;
-  --color-info:           #0284c7;
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-warning-light: #f59e0b;
+  --color-danger: #C42027;
+  --color-info: #0284c7;
 
   /* ── Surfaces ─────────────────────── */
-  --color-background:     #f5f5f5;
-  --color-surface:        #ffffff;
-  --color-surface-hover:  #f9f9f9;
-  --color-surface-muted:  #f0f0f0;
-  --color-topbar:         #000000;
-  --color-sidebar-bg:     #ffffff;
+  --color-background: #f5f5f5;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f9f9f9;
+  --color-surface-muted: #f0f0f0;
+  --color-toast-bg: #222222;
+  --color-header-bg: #f8f8f8;
+  --color-topbar: #000000;
+  --color-topbar-item-bg: rgba(255, 255, 255, 0.12);
+  --color-topbar-border: rgba(255, 255, 255, 0.2);
+  --color-tabnav-bg: #1a1a1a;
+  --color-tabnav-border: #333333;
+  --color-sidebar-bg: #ffffff;
 
   /* ── Text ─────────────────────────── */
-  --color-text:           #111111;
+  --color-text: #111111;
   --color-text-secondary: #444444;
-  --color-text-muted:     #888888;
-  --color-text-inverse:   #ffffff;
+  --color-text-muted: #888888;
+  --color-text-inverse: #ffffff;
+  --color-text-inverse-muted: rgba(255, 255, 255, 0.6);
 
   /* ── Borders ──────────────────────── */
-  --color-border:         #e0e0e0;
-  --color-border-strong:  #c0c0c0;
+  --color-border: #e0e0e0;
+  --color-border-strong: #c0c0c0;
+  --color-scrollbar: #cccccc;
+  --color-scrollbar-hover: #aaaaaa;
+  --color-denom-bg: #eaf0ff;
+  --color-denom-text: #2563eb;
+  --color-denom-border: #bfdbfe;
 
   /* ── Shadows ──────────────────────── */
-  --shadow-xs:   0 1px 2px rgba(0,0,0,0.06);
-  --shadow-sm:   0 1px 4px rgba(0,0,0,0.08);
-  --shadow-md:   0 4px 12px rgba(0,0,0,0.10);
-  --shadow-lg:   0 8px 24px rgba(0,0,0,0.12);
-  --shadow-card: 0 1px 3px rgba(0,0,0,0.07);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.10);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.18);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.07);
 
   /* ── Spacing ──────────────────────── */
-  --spacing-xs:  4px;
-  --spacing-sm:  8px;
-  --spacing-md:  12px;
-  --spacing-lg:  16px;
-  --spacing-xl:  24px;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
 
   /* ── Typography ───────────────────── */
-  --font-family:          'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-size-xs:         0.70rem;
-  --font-size-sm:         0.80rem;
-  --font-size-md:         0.875rem;
-  --font-size-lg:         1rem;
-  --font-size-xl:         1.125rem;
-  --font-weight-normal:   400;
-  --font-weight-medium:   500;
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-size-xs: 0.70rem;
+  --font-size-sm: 0.80rem;
+  --font-size-md: 0.875rem;
+  --font-size-lg: 1rem;
+  --font-size-xl: 1.125rem;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
   --font-weight-semibold: 600;
-  --font-weight-bold:     700;
+  --font-weight-bold: 700;
 
   /* ── Radius ───────────────────────── */
-  --radius-sm:   4px;
-  --radius-md:   6px;
-  --radius-lg:   10px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
   --radius-full: 9999px;
 
   /* ── Layout ───────────────────────── */
-  --topbar-h:       44px;
-  --tabnav-h:       40px;
-  --sidebar-w:      320px;
-  --product-grid-h: 230px;
+  --topbar-h: 44px;
+  --tabnav-h: 40px;
+  --sidebar-w:      450px;
+  --product-grid-h: 320px;
+  /* Thẻ co giãn theo Sidebar: (100% màn hình - sidebar - padding) / số cột */
+  --product-card-w: calc((100vw - var(--sidebar-w) - 34px) / 5);
+  --product-card-h: 120px;
 
   /* ── Transitions ──────────────────── */
-  --transition-fast:   0.12s ease;
+  --transition-fast: 0.12s ease;
   --transition-normal: 0.22s ease;
+}
+
+@media (max-width: 1440px) {
+  :root {
+    --sidebar-w: 380px;
+    --product-card-w: calc((100vw - var(--sidebar-w) - 34px) / 4); /* 4 cột trên Laptop */
+    --product-card-h: 115px;
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   TABLET  768px – 1199px
+══════════════════════════════════════════════════ */
+@media (max-width: 1199px) {
+  :root {
+    --sidebar-w: 300px;
+    --product-grid-h: 260px;
+    --product-card-w: calc((100vw - var(--sidebar-w) - 24px) / 3); /* 3 cột trên Tablet */
+    --product-card-h: 110px;
+  }
 }

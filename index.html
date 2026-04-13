@@ -33,6 +33,7 @@
 
   <!-- Page Specific Components -->
   <link rel="stylesheet" href="src/css/components/topbar.css">
+  <link rel="stylesheet" href="src/css/components/topbar-dropdown.css">
   <link rel="stylesheet" href="src/css/components/tabs.css">
   <link rel="stylesheet" href="src/css/components/order-table.css">
   <link rel="stylesheet" href="src/css/components/quick-grid.css">
@@ -64,70 +65,91 @@
   ══════════════════════════════════════════════════════════ -->
     <header id="topbar">
 
-      <!-- Logo -->
-      <div class="topbar-logo">
-        VITIMEX<sup>®</sup>
+      <!-- Logo and User info removed as per user request -->
+
+      <div class="topbar-search" style="position: relative;">
+        <span class="search-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </span>
+        <input id="topbar-search-input" type="text" placeholder="Tìm kiếm mặt hàng..." autocomplete="off">
+        <span class="topbar-shortcut">F1</span>
+        <!-- Dropdown kết quả tìm kiếm thả xuống từ trên thanh ngọc -->
+        <div id="topbar-search-dropdown" class="topbar-search-dropdown hidden"></div>
       </div>
 
       <div class="topbar-sep"></div>
 
-      <div class="topbar-left">
-        <div class="branch-info">
-          <span class="branch-icon">👤</span>
-          <span class="branch-name" id="current-branch">Đang tải...</span>
-          <button id="btn-logout" style="background:none; border:1px solid #444; color:#999; 
-          font-size:10px; padding:2px 8px; border-radius:4px; cursor:pointer; margin-left:10px;">
-            ĐĂNG XUẤT
+      <!-- ── Mobile bottom nav / Desktop inline nav ── -->
+      <div class="topbar-nav" id="topbar-nav">
+
+        <!-- Channel selector -->
+        <select class="topbar-select" id="channel-select">
+          <option value="offline">Kênh bán hàng</option>
+          <option value="online">Bán Online</option>
+          <option value="shopee">Sàn Shopee</option>
+        </select>
+
+        <!-- Đổi trả -->
+        <button class="topbar-btn topbar-btn-accent">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          Đổi trả hàng
+        </button>
+
+        <!-- Giá niêm yết -->
+        <select class="topbar-select" id="price-select">
+          <option>Giá niêm yết</option>
+          <option>Giá VIP</option>
+        </select>
+
+        <!-- Staff -->
+        <select class="topbar-select" id="staff-select">
+          <option value="admin">Quản trị viên</option>
+          <option value="staff1">Nhân viên 01</option>
+          <option value="staff2">Nhân viên 02</option>
+        </select>
+
+      </div>
+
+      <!-- User info dropdown moved to right corner -->
+      <div class="topbar-user-right" id="user-menu-wrapper">
+        <div class="topbar-user-info">
+          <span class="topbar-icon-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </span>
+          <span id="current-branch" class="topbar-user-name">ADMIN</span>
+          <!-- Mũi tên trỏ xuống -->
+          <svg class="tb-dropdown-caret" style="margin-left:4px; opacity:0.5;" viewBox="0 0 10 6" fill="none"
+            stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="10"
+            height="6">
+            <polyline points="1 1 5 5 9 1" />
+          </svg>
+        </div>
+
+        <!-- Dropdown con -->
+        <div class="user-dropdown-menu">
+          <button id="btn-logout" class="user-dropdown-item text-accent">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Đăng xuất
           </button>
         </div>
-      </div>
-
-      <div class="topbar-search">
-        <span class="search-icon">🔍</span>
-        <input id="topbar-search-input" type="text" placeholder="Tìm kiếm mặt hàng...">
-        <span class="topbar-shortcut">F1</span>
-      </div>
-
-      <div class="topbar-sep"></div>
-
-      <!-- Channel selector -->
-      <select class="topbar-select" id="channel-select">
-        <option value="offline">🏪 Kênh bán hàng</option>
-        <option value="online">🌐 Online</option>
-        <option value="shopee">📦 Shopee</option>
-      </select>
-
-      <!-- Đổi trả -->
-      <button class="btn"
-        style="background:rgba(255,255,255,0.12);color:#fff;font-size:var(--font-size-xs);padding:5px 10px;border:1px solid rgba(255,255,255,0.2);">
-        🔄 Đổi trả hàng
-      </button>
-
-      <!-- Giá niêm yết -->
-      <select class="topbar-select" id="price-select">
-        <option>Giá niêm yết</option>
-        <option>Giá VIP</option>
-      </select>
-
-      <!-- Staff -->
-      <select class="topbar-select" id="staff-select">
-        <option>🧑‍💼 Admin</option>
-        <option>Nhân viên 1</option>
-        <option>Nhân viên 2</option>
-      </select>
-
-      <!-- Icon buttons -->
-      <div class="topbar-icons">
-        <button class="topbar-icon-btn" title="Kho hàng">📦</button>
-        <button class="topbar-icon-btn" title="Thông báo">
-          🔔
-          <span class="topbar-badge"></span>
-        </button>
-        <button class="topbar-icon-btn" title="Báo cáo">📊</button>
-        <button class="topbar-icon-btn" title="Cài đặt">⚙️</button>
-        <button class="topbar-icon-btn" title="Đăng xuất">🚪</button>
-        <div style="padding:0 6px;font-size:var(--font-size-xs);background:rgba(255,255,255,0.1);
-        border-radius:var(--radius-sm);color:rgba(255,255,255,0.8);" id="clock-display"></div>
       </div>
 
     </header>
@@ -148,17 +170,7 @@
       <div id="pos-area">
 
         <!-- Order toolbar -->
-        <div style="display:flex;align-items:center;gap:8px;padding:5px 10px;
-        background:var(--color-surface);border-bottom:1px solid var(--color-border);flex-shrink:0;">
-          <button class="btn btn-ghost btn-sm" id="btn-clear-order">🗑️ Xóa đơn</button>
-          <span style="font-size:var(--font-size-xs);color:var(--color-text-muted);">
-            📝 Ghi chú:
-          </span>
-          <input type="text" class="form-input" id="order-note" placeholder="Ghi chú đơn hàng..."
-            style="max-width:200px;font-size:var(--font-size-xs);padding:3px 8px;">
-          <span style="font-size:var(--font-size-xs);color:var(--color-text-muted);margin-left:auto;"
-            id="toolbar-datetime"></span>
-        </div>
+        <!-- Order toolbar removed as per user request -->
 
         <!-- Product table -->
         <div id="order-table-wrap">
@@ -173,6 +185,9 @@
       </div>
 
       <!-- ── Payment Sidebar ─────────────────────────────────── -->
+      <!-- Sidebar resizer (placed between area to avoid clipping) -->
+      <div class="sidebar-resizer" id="sidebar-resizer"></div>
+
       <aside id="payment-sidebar">
         <!-- Rendered by JS -->
       </aside>
@@ -198,6 +213,7 @@
   <script src="src/js/utils/modal-helper.js"></script>
   <script src="src/js/components/LoadingSpinner.js"></script>
   <script src="src/js/components/Alert.js"></script>
+  <script src="src/js/components/TopbarDropdown.js"></script>
   <script src="src/js/config/api.config.js"></script>
   <script src="src/js/services/http.service.js"></script>
   <script src="src/js/services/pos.service.js"></script>
@@ -223,6 +239,81 @@
     }
     setInterval(updateClock, 1000);
     updateClock();
+
+    // ── Sidebar Resize Logic ────────────────────────────────────────────────
+    $(() => {
+      const $resizer = $('#sidebar-resizer');
+      const $sidebar = $('#payment-sidebar');
+      if (!$resizer.length || !$sidebar.length) return;
+
+      let isResizing = false;
+      let _minW = 220; // fallback
+
+      // Load saved width tương ứng với thiết bị
+      const isTablet = window.innerWidth < 1199;
+      const lsKey = isTablet ? 'vitimex-sidebar-w-tab' : 'vitimex-sidebar-w-desk';
+      const savedWidth = localStorage.getItem(lsKey);
+      
+      if (savedWidth) {
+        // Rào biên an toàn ngay lúc load
+        const sw = parseFloat(savedWidth);
+        const maxWidthLimit = isTablet ? 380 : 480;
+        const maxW = Math.min(window.innerWidth * 0.5, maxWidthLimit);
+        const finalW = Math.max(200, Math.min(sw, maxW));
+        document.documentElement.style.setProperty('--sidebar-w', finalW + 'px');
+      } else {
+        // Trả về mặc định sạch sẽ nếu chưa từng kéo
+        document.documentElement.style.removeProperty('--sidebar-w');
+      }
+
+      // Snapshot content natural width khi bắt đầu kéo
+      function captureMinW() {
+        const body = $sidebar.find('.payment-body')[0];
+        if (body) {
+          // Tạm thời expand sidebar để đo scrollWidth thực
+          const prev = $sidebar[0].style.width;
+          $sidebar[0].style.width = 'max-content';
+          _minW = Math.ceil($sidebar[0].scrollWidth);
+          $sidebar[0].style.width = prev;
+        }
+      }
+
+      $resizer.on('mousedown touchstart', (e) => {
+        isResizing = true;
+        $resizer.addClass('active');
+        $('body').css('cursor', 'col-resize').css('user-select', 'none');
+        captureMinW(); 
+      });
+
+      $(document).on('mousemove touchmove', (e) => {
+        if (!isResizing) return;
+        // Hỗ trợ cả thao tác chạm trên Tablet giả lập
+        const clientX = e.type.includes('touch') ? (e.touches ? e.touches[0].clientX : e.originalEvent.touches[0].clientX) : e.clientX;
+        const offsetRight = window.innerWidth - clientX;
+        
+        // Giới hạn max: 45% màn hình, nhưng không vượt quá 480px (Desktop) hoặc 380px (Tablet)
+        const maxWidthLimit = window.innerWidth < 1199 ? 380 : 480;
+        const maxW = Math.min(window.innerWidth * 0.5, maxWidthLimit);
+        
+        // Cố định minW an toàn thay vì phụ thuộc vào thẻ max-content (có thể bung sai số)
+        const safeMinW = Math.min(_minW, 260); // Chỉ đo _minW đến tối đa 260px 
+
+        // Gò ép (clamp) offsetRight vào khoảng [safeMinW, maxW]
+        let newW = Math.max(safeMinW, Math.min(offsetRight, maxW));
+        document.documentElement.style.setProperty('--sidebar-w', newW + 'px');
+      }).on('mouseup touchend touchcancel', () => {
+        if (isResizing) {
+          isResizing = false;
+          $resizer.removeClass('active');
+          $('body').css('cursor', '').css('user-select', '');
+          const currentW = document.documentElement.style.getPropertyValue('--sidebar-w');
+          if (currentW) {
+            const isTab = window.innerWidth < 1199;
+            localStorage.setItem(isTab ? 'vitimex-sidebar-w-tab' : 'vitimex-sidebar-w-desk', currentW);
+          }
+        }
+      });
+    });
 
     // ── Mobile: Show/hide FAB + drawer logic ───────────────────────────────────
     function isMobile() { return window.innerWidth < 768; }
@@ -296,6 +387,30 @@
           order.payments = [{ methodId: 'TIENMAT', amount: 0 }];
           document.dispatchEvent(new CustomEvent('vitimex:rerender'));
           updateMobileFab();
+        }
+      }
+    });
+
+    // ── Xử lý User Dropdown & đóng các menu trên toàn màn hình ─────────────────
+    document.addEventListener('click', function (e) {
+      const userMenu = document.getElementById('user-menu-wrapper');
+      const isClickInsideUserMenu = userMenu && userMenu.contains(e.target);
+
+      // Nếu click bên ngoài User Menu, thì đảm bảo đóng User Menu
+      if (userMenu && !isClickInsideUserMenu) {
+        userMenu.classList.remove('open');
+      }
+
+      // Nếu click VÀO User Menu
+      if (isClickInsideUserMenu) {
+        // Toggle User Menu
+        userMenu.classList.toggle('open');
+        // Nếu user menu VỪA ĐƯỢC MỞ (open), đi đóng các tb-dropdown khác
+        if (userMenu.classList.contains('open')) {
+          document.querySelectorAll('.tb-dropdown.open').forEach(el => el.classList.remove('open'));
+          document.querySelectorAll('.tb-dropdown-trigger').forEach(el => el.setAttribute('aria-expanded', 'false'));
+          const bd = document.getElementById('tb-dropdown-bd');
+          if (bd) bd.remove();
         }
       }
     });

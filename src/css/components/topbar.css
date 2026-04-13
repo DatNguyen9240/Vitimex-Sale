@@ -2,74 +2,376 @@
    Top Bar — Vitimex POS
    ═══════════════════════════════════════════ */
 
-/* ── Search bar ─────────────────────────────── */
-.topbar-search {
-  display: flex; align-items: center;
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.22);
-  border-radius: var(--radius-md);
-  padding: 0 10px; gap: 6px;
-  flex: 1; max-width: 360px; height: 30px;
-  transition: background var(--transition-fast);
-}
-.topbar-search:focus-within {
-  background: rgba(255,255,255,0.2);
-  border-color: rgba(255,255,255,0.4);
-}
-.topbar-search input {
-  background: transparent; border: none; outline: none;
-  color: #fff; font-family: var(--font-family);
-  font-size: var(--font-size-sm); flex: 1;
-  min-width: 0;
-}
-.topbar-search input::placeholder { color: rgba(255,255,255,0.5); }
-.topbar-search .search-icon { color: rgba(255,255,255,0.6); font-size: 0.9rem; flex-shrink: 0; }
-.topbar-shortcut {
-  background: rgba(255,255,255,0.15); border-radius: 3px;
-  padding: 1px 5px; font-size: 0.65rem; color: rgba(255,255,255,0.7);
-  font-weight: 600; letter-spacing: 0.05em; flex-shrink: 0;
-}
-
-/* ── Channel dropdown ───────────────────────── */
-.topbar-select {
-  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
-  color: #fff; font-family: var(--font-family); font-size: var(--font-size-sm);
-  border-radius: var(--radius-md); padding: 4px 24px 4px 10px;
-  cursor: pointer; height: 30px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='rgba(255,255,255,0.7)' d='M5 7L0 2h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: right 8px center;
-  appearance: none; -webkit-appearance: none;
-  outline: none;
-}
-
-/* ── Topbar right icons ──────────────────────── */
-.topbar-icons { display: flex; align-items: center; gap: 2px; margin-left: auto; }
-.topbar-icon-btn {
-  width: 32px; height: 32px; border-radius: var(--radius-sm);
-  display: flex; align-items: center; justify-content: center;
-  background: transparent; border: none; cursor: pointer;
-  color: rgba(255,255,255,0.75); font-size: 1rem;
-  transition: background var(--transition-fast), color var(--transition-fast);
-  position: relative;
-}
-.topbar-icon-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
-.topbar-badge {
-  position: absolute; top: 4px; right: 4px;
-  width: 8px; height: 8px; background: var(--color-accent);
-  border-radius: 50%; border: 1.5px solid var(--color-topbar);
-}
-
 /* ── Logo ──────────────────────────────────── */
 .topbar-logo {
-  font-size: 1rem; font-weight: 800; color: #fff;
-  letter-spacing: 0.04em; flex-shrink: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--color-text-inverse);
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
   text-transform: uppercase;
-  display: flex; align-items: center; gap: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: var(--spacing-sm);
 }
-.topbar-logo sup { font-size: 0.45em; color: rgba(255,255,255,0.7); vertical-align: super; }
 
-/* ── Topbar divider ─────────────────────────── */
+.topbar-logo sup {
+  font-size: 0.45em;
+  color: var(--color-text-inverse-muted);
+  vertical-align: super;
+}
+
+/* ── Thin separator between topbar groups ── */
 .topbar-sep {
-  width: 1px; height: 20px; background: rgba(255,255,255,0.2);
-  flex-shrink: 0; margin: 0 4px;
+  width: 1px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.15);
+  flex-shrink: 0;
+  align-self: center;
+}
+
+/* ── Nav group container (desktop: inline, mobile: bottom bar) ── */
+.topbar-nav {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  gap: 0;
+}
+
+/* ── Topbar buttons — borderless, seamless ── */
+.topbar-btn {
+  background: transparent;
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-xs);
+  padding: 0 10px;
+  height: 100%;
+  border: none;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  white-space: nowrap;
+  opacity: 0.85;
+}
+
+.topbar-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 1;
+}
+
+.topbar-btn:active {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.topbar-btn svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.topbar-btn:hover svg {
+  opacity: 1;
+}
+
+/* ── Accent variant (e.g. "Đổi trả hàng") ── */
+.topbar-btn.topbar-btn-accent {
+  color: var(--color-warning-light);
+  opacity: 1;
+}
+
+.topbar-btn.topbar-btn-accent:hover {
+  background: rgba(245, 158, 11, 0.12);
+}
+
+/* ── Channel / select dropdowns — seamless ── */
+.topbar-select {
+  background: transparent;
+  border: none;
+  color: var(--color-text-inverse);
+  font-family: var(--font-family);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: 4px 22px 4px 0;
+  cursor: pointer;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='rgba(255,255,255,0.5)' d='M5 7L0 2h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  opacity: 0.85;
+  transition: opacity var(--transition-fast);
+}
+
+.topbar-select:hover {
+  opacity: 1;
+}
+
+.topbar-select option {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+/* ── Search bar ─────────────────────────────── */
+.topbar-search {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-md);
+  padding: 0 10px;
+  gap: 6px;
+  flex: 1;
+  max-width: 360px;
+  height: 28px;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.topbar-search:focus-within {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.topbar-search-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  min-width: 320px;
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.5);
+  z-index: 9999;
+  max-height: 400px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar-search-dropdown.hidden {
+  display: none;
+}
+
+.topbar-search-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  gap: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background var(--transition-fast);
+}
+.topbar-search-item:last-child {
+  border-bottom: none;
+}
+.topbar-search-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.ts-item-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+.ts-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+.ts-item-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ts-item-price {
+  font-size: 0.8rem;
+  color: var(--color-accent);
+  font-weight: 600;
+}
+.ts-item-code {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.topbar-search input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--color-text-inverse);
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  flex: 1;
+  min-width: 0;
+}
+
+.topbar-search input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.topbar-search .search-icon {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.topbar-shortcut {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+/* ── Right icon buttons ─────────────────────── */
+.topbar-icons {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-left: auto;
+}
+
+.topbar-icon-btn {
+  width: 34px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 1rem;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  position: relative;
+  border-radius: 0;
+}
+
+.topbar-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-inverse);
+}
+
+.topbar-badge {
+  position: absolute;
+  top: 6px;
+  right: 5px;
+  width: 7px;
+  height: 7px;
+  background: var(--color-accent);
+  border-radius: 50%;
+  border: 1.5px solid var(--color-topbar);
+}
+
+/* ── User info (right side) ────────────────── */
+.topbar-user-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 0 var(--spacing-sm);
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--transition-fast);
+}
+
+.topbar-user-right:hover,
+.topbar-user-right.open {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.topbar-user-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.topbar-user-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-inverse);
+  letter-spacing: 0.02em;
+}
+
+.topbar-icon-box {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-inverse-muted);
+}
+
+/* ── Custom User Dropdown Menu ───────────── */
+.user-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 8px;
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.3);
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  z-index: 9000;
+  
+  /* Animation state */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px) scale(0.97);
+  transform-origin: top right;
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+}
+
+.topbar-user-right.open .tb-dropdown-caret {
+  transform: rotate(180deg);
+}
+
+.topbar-user-right.open .user-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.user-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: var(--font-size-xs);
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-inverse);
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.user-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Hidden original selects ────────────────── */
+.topbar-select {
+  display: none;
 }

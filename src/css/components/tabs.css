@@ -5,8 +5,8 @@
 .tab-item {
   display: flex; align-items: center; gap: 6px;
   padding: 0 12px; height: 100%; cursor: pointer;
-  border-right: 1px solid #333;
-  color: rgba(255,255,255,0.55);
+  border-right: 1px solid var(--color-tabnav-border);
+  color: var(--color-text-inverse-muted);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   white-space: nowrap; flex-shrink: 0;
@@ -14,17 +14,17 @@
   position: relative; user-select: none;
   min-width: 110px;
 }
-.tab-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
+.tab-item:hover { background: rgba(255,255,255,0.07); color: var(--color-text-inverse); }
 .tab-item.active {
-  background: var(--color-bg);
-  color: var(--color-text);
+  background: var(--color-background);
+  color: var(--color-primary);
   border-top: 2px solid var(--color-accent);
   margin-top: 2px;
 }
 .tab-item.active::after {
   content: ''; display: block;
   position: absolute; bottom: -1px; left: 0; right: 0;
-  height: 1px; background: var(--color-bg);
+  height: 1px; background: var(--color-background);
 }
 
 .tab-name { flex: 1; overflow: hidden; text-overflow: ellipsis; }
@@ -43,7 +43,7 @@
   width: 36px; height: 100%; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   background: transparent; border: none; cursor: pointer;
-  color: rgba(255,255,255,0.55); font-size: 1.1rem;
+  color: var(--color-text-inverse-muted); font-size: 1.1rem;
   transition: background var(--transition-fast), color var(--transition-fast);
 }
-.tab-add:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.tab-add:hover { background: rgba(255,255,255,0.1); color: var(--color-text-inverse); }

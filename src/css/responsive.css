@@ -4,34 +4,66 @@
    ═══════════════════════════════════════════════════════════ */
 
 /* ══════════════════════════════════════════════════
+   LAPTOP  1200px – 1440px
+══════════════════════════════════════════════════ */
+@media (max-width: 1440px) {
+  :root {
+    --sidebar-w: 380px;
+    --product-card-w: 220px;
+    --product-card-h: 115px;
+  }
+}
+
+/* ══════════════════════════════════════════════════
    TABLET  768px – 1199px
 ══════════════════════════════════════════════════ */
 @media (max-width: 1199px) {
   :root {
-    --sidebar-w: 260px;
-    --product-grid-h: 200px;
+    --sidebar-w: 300px;
+    --product-grid-h: 260px;
+    --product-card-w: 160px;
+    --product-card-h: 110px;
   }
 
   /* Topbar — hide low-priority items */
-  #price-select,
-  #staff-select,
-  .topbar-sep:nth-of-type(2) { display: none; }
+  .topbar-hide-md,
+  .topbar-sep:nth-of-type(2) {
+    display: none !important;
+  }
 
-  .topbar-search { max-width: 240px; }
+  .topbar-search {
+    max-width: 240px;
+  }
 
-  #channel-select { max-width: 130px; font-size: var(--font-size-xs); }
+  .topbar-channel {
+    max-width: 130px;
+    font-size: var(--font-size-xs);
+  }
 
-  .topbar-logo { font-size: 0.85rem; }
+  .topbar-logo {
+    font-size: 0.85rem;
+  }
 
   /* Tab items — narrower */
-  .tab-item { min-width: 90px; padding: 0 8px; font-size: var(--font-size-xs); }
+  .tab-item {
+    min-width: 90px;
+    padding: 0 8px;
+    font-size: var(--font-size-xs);
+  }
 
   /* Order table — horizontal scroll */
-  #order-table-wrap { overflow-x: auto; }
-  .order-table { min-width: 760px; }
+  #order-table-wrap {
+    overflow-x: auto;
+  }
+
+  .order-table {
+    min-width: 760px;
+  }
 
   /* Quick grid — smaller cards */
-  .product-card { width: 95px; }
+  .product-card {
+    /* Đã được điều khiển bởi biến CSS trong :root ở trên */
+  }
 }
 
 /* ══════════════════════════════════════════════════
@@ -39,91 +71,187 @@
 ══════════════════════════════════════════════════ */
 @media (max-width: 767px) {
   :root {
-    --topbar-h:       50px;
-    --tabnav-h:       38px;
+    --topbar-h: 50px;
+    --tabnav-h: 38px;
     --product-grid-h: 185px;
-    --sidebar-w:      100%;        /* drawer fills screen width */
+    --sidebar-w: 100%;
+    /* drawer fills screen width */
   }
 
   /* ── Body: no overflow hidden on mobile (drawer scrolls) ─── */
-  body { overflow: hidden; }
-
-  /* ── TOP BAR ─────────────────────────────────────────────── */
-  #topbar {
-    padding: 0 8px;
-    gap: 6px;
+  body {
+    overflow: hidden;
   }
 
-  /* Hide everything except logo, search, checkout button */
+  /* ── TOP BAR — 2-row layout on mobile ────────────────────── */
+  #topbar {
+    padding: 6px 8px;
+    height: auto;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 6px 8px;
+    /* row-gap 6px, col-gap 8px */
+  }
+
+  /* Row 1, Col 1: search */
+  #topbar>.topbar-search {
+    grid-column: 1;
+    grid-row: 1;
+    height: 34px;
+    max-width: none;
+  }
+
+  /* Row 1, Col 2: user right */
+  #topbar>.topbar-user-right {
+    grid-column: 2;
+    grid-row: 1;
+    height: 34px;
+    border-left: none;
+    padding-left: 0;
+  }
+
+  /* Hide separator + clock on mobile */
   #topbar .topbar-sep,
-  #topbar #channel-select,
-  #topbar #price-select,
-  #topbar #staff-select,
-  #topbar .btn,
-  #topbar #clock-display,
-  /* Keep only 2 icon slots on mobile */
-  .topbar-icon-btn:nth-child(n+3) { display: none; }
+  #topbar #clock-display {
+    display: none;
+  }
 
-  .topbar-logo { font-size: 0.9rem; }
-
-  .topbar-search { max-width: none; flex: 1; height: 32px; }
+  .topbar-logo {
+    font-size: 0.9rem;
+  }
 
   /* Quick payment icon visible on topbar instead of sidebar btn */
-  .topbar-icon-btn { width: 34px; height: 34px; }
+  .topbar-icon-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  /* ── ROW 2: Nav items — scroll ngang ────────────────────── */
+  .topbar-nav {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    height: 38px;
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .topbar-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Nav items inside row 2 */
+  .topbar-nav .tb-dropdown,
+  .topbar-nav .topbar-btn {
+    flex-shrink: 0;
+    height: 100%;
+    font-size: 0.72rem;
+  }
+
+  .topbar-nav .tb-dropdown-trigger {
+    min-width: unset;
+    padding: 0 14px;
+    font-size: 0.72rem;
+  }
 
   /* ── TAB NAV ─────────────────────────────────────────────── */
-  .tab-item { min-width: 80px; padding: 0 8px; font-size: 0.72rem; }
+  .tab-item {
+    min-width: 80px;
+    padding: 0 8px;
+    font-size: 0.72rem;
+  }
 
   /* ── MAIN AREA: stack vertically ───────────────────────────  */
-  #main-area { flex-direction: column; overflow: hidden; }
+  #main-area {
+    flex-direction: column;
+    overflow: hidden;
+  }
 
   /* ── POS AREA ────────────────────────────────────────────── */
-  #pos-area { flex: 1; min-height: 0; }
+  #pos-area {
+    flex: 1;
+    min-height: 0;
+  }
 
   /* Order toolbar compact */
-  #pos-area > div:first-child {
+  #pos-area>div:first-child {
     padding: 4px 8px;
     gap: 6px;
   }
-  #pos-area > div:first-child #order-note { max-width: 130px; font-size: 0.7rem; }
-  #pos-area > div:first-child #toolbar-datetime { display: none; }
+
+  #pos-area>div:first-child #order-note {
+    max-width: 130px;
+    font-size: 0.7rem;
+  }
+
+  #pos-area>div:first-child #toolbar-datetime {
+    display: none;
+  }
 
   /* ── ORDER TABLE: horizontal scroll + condensed ─────────── */
-  #order-table-wrap { overflow-x: auto; overflow-y: auto; }
-  .order-table { min-width: 680px; font-size: 0.72rem; }
-  .order-table thead th { padding: 5px 6px; font-size: 0.65rem; }
-  .order-table tbody td { padding: 4px 6px; }
-  .qty-input  { width: 44px; padding: 2px 4px; }
-  .disc-input { width: 46px; padding: 2px 4px; }
-
-  /* ── QUICK GRID: 1 row horizontal scroll ────────────────── */
-  #quick-grid { height: var(--product-grid-h); }
-  .quick-grid-body {
-    grid-template-rows: 1fr;    /* single row */
-    padding: 5px;
-    gap: 5px;
+  #order-table-wrap {
+    overflow-x: auto;
+    overflow-y: auto;
   }
-  .product-card { width: 100px; }
-  .product-card-sizes { gap: 2px; padding: 2px 4px 4px; }
-  .size-btn { padding: 1px 4px; font-size: 0.6rem; }
+
+  .order-table {
+    min-width: 680px;
+    font-size: 0.72rem;
+  }
+
+  .order-table thead th {
+    padding: 5px 6px;
+    font-size: 0.65rem;
+  }
+
+  .order-table tbody td {
+    padding: 4px 6px;
+  }
+
+  .qty-input {
+    width: 44px;
+    padding: 2px 4px;
+  }
+
+  .disc-input {
+    width: 46px;
+    padding: 2px 4px;
+  }
+
+  /* ── QUICK GRID & RESIZER ─────────────────────────────────── */
+  /* Theo yêu cầu: Ẩn hoàn toàn tính năng danh sách sản phẩm chọn nhanh (quick-grid) và toolbar của nó trên mobile */
+  #quick-grid,
+  .resizer {
+    display: none !important;
+  }
 
   /* ── PAYMENT SIDEBAR ─────────────────────────────────────── */
 
   /* Default: hidden (drawer) */
   #payment-sidebar {
     position: fixed;
-    bottom: 0; left: 0; right: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
     width: 100%;
     height: 85dvh;
     border-left: none;
     border-top: 2px solid var(--color-border);
     border-radius: 16px 16px 0 0;
-    box-shadow: 0 -8px 40px rgba(0,0,0,0.18);
+    box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.18);
     z-index: 200;
     transform: translateY(100%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
   }
+
   #payment-sidebar.open {
     transform: translateY(0);
   }
@@ -132,7 +260,8 @@
   #payment-sidebar::before {
     content: '';
     display: block;
-    width: 36px; height: 4px;
+    width: 36px;
+    height: 4px;
     background: var(--color-border-strong);
     border-radius: 2px;
     margin: 8px auto 0;
@@ -141,74 +270,132 @@
 
   /* Overlay when drawer is open */
   #sidebar-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.45);
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
     z-index: 199;
-    opacity: 0; pointer-events: none;
+    opacity: 0;
+    pointer-events: none;
     transition: opacity 0.3s ease;
   }
+
   #sidebar-overlay.visible {
-    opacity: 1; pointer-events: auto;
+    opacity: 1;
+    pointer-events: auto;
   }
 
   /* Checkout FAB — always visible on mobile */
   #mobile-checkout-fab {
     position: fixed;
-    bottom: 14px; right: 14px;
+    bottom: 14px;
+    right: 14px;
     z-index: 150;
     background: var(--color-accent);
     color: #fff;
-    border: none; border-radius: var(--radius-full);
+    border: none;
+    border-radius: var(--radius-full);
     padding: 12px 20px;
     font-family: var(--font-family);
-    font-size: 0.875rem; font-weight: 700;
-    box-shadow: 0 4px 20px rgba(196,32,39,0.45);
+    font-size: 0.875rem;
+    font-weight: 700;
+    box-shadow: 0 4px 20px rgba(196, 32, 39, 0.45);
     cursor: pointer;
-    display: flex; align-items: center; gap: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
   }
+
   #mobile-checkout-fab:active {
     transform: scale(0.96);
-    box-shadow: 0 2px 10px rgba(196,32,39,0.4);
+    box-shadow: 0 2px 10px rgba(196, 32, 39, 0.4);
   }
+
   #mobile-checkout-fab .fab-amount {
-    background: rgba(255,255,255,0.25);
+    background: rgba(255, 255, 255, 0.25);
     border-radius: var(--radius-full);
     padding: 2px 8px;
     font-size: 0.75rem;
   }
 
-  /* Hide static payment actions row (replaced by FAB) */
-  .payment-actions { display: none; }
+
 
   /* Payment body padding adjust */
-  .payment-body { padding: 8px 14px 0; }
-  .denomination-btns { gap: 5px; }
-  .denom-btn { padding: 4px 9px; font-size: 0.72rem; }
+  .payment-body {
+    padding: 8px 14px 0;
+  }
+
+  .denomination-btns {
+    gap: 5px;
+  }
+
+  .denom-btn {
+    padding: 4px 9px;
+    font-size: 0.72rem;
+  }
 
   /* Bill rows on mobile: slightly larger touch targets */
-  .bill-row { padding: 6px 0; }
-  .bill-total-value { font-size: 1.2rem; }
+  .bill-row {
+    padding: 6px 0;
+  }
+
+  .bill-total-value {
+    font-size: 1.2rem;
+  }
 }
 
 /* ══════════════════════════════════════════════════
-   SMALL MOBILE  < 390px  (se size)
+   SMALL MOBILE  < 390px  (se size, 320px)
 ══════════════════════════════════════════════════ */
 @media (max-width: 389px) {
-  .tab-item { min-width: 70px; padding: 0 6px; }
-  .topbar-search { height: 28px; }
-  .product-card { width: 88px; }
+  .tab-item {
+    min-width: 70px;
+    padding: 0 6px;
+  }
+
+  /* Ẩn tên đăng nhập để nhường diện tích cho ô search trên máy rất bé */
+  .topbar-user-name {
+    display: none;
+  }
+
+  #topbar>.topbar-search {
+    height: 32px;
+  }
+
+  #topbar>.topbar-user-right {
+    height: 32px;
+  }
+
 }
 
 /* ══════════════════════════════════════════════════
    PRINT  (receipt stub)
 ══════════════════════════════════════════════════ */
 @media print {
-  #topbar, #tab-nav, #quick-grid, #payment-sidebar,
-  #mobile-checkout-fab, #sidebar-overlay,
-  #pos-area > div:first-child { display: none !important; }
 
-  body, #main-area, #pos-area { overflow: visible; height: auto; }
-  #order-table-wrap { overflow: visible; }
-  .order-table { min-width: unset; font-size: 11px; }
+  #topbar,
+  #tab-nav,
+  #quick-grid,
+  #payment-sidebar,
+  #mobile-checkout-fab,
+  #sidebar-overlay,
+  #pos-area>div:first-child {
+    display: none !important;
+  }
+
+  body,
+  #main-area,
+  #pos-area {
+    overflow: visible;
+    height: auto;
+  }
+
+  #order-table-wrap {
+    overflow: visible;
+  }
+
+  .order-table {
+    min-width: unset;
+    font-size: 11px;
+  }
 }

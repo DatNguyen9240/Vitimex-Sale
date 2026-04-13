@@ -8,14 +8,14 @@ window.PosService = (function () {
   const EP = window.API_CONFIG.ENDPOINTS.POS;
 
   /** Search products from SQL */
-  async function searchProducts(searchTerm = '', branchId = 'HN01') {
+  async function searchProducts(searchTerm = '', branchId = '') {
     const user = AuthService.getUser();
     try {
       const res = await Http.post(EP.SEARCH_ITEMS, {
-        ChiNhanhID: user.BranchID || branchId || 'HN01',
-        UserName: user.UserName || 'admin',
+        ChiNhanhID: user.BranchID || branchId || '',
+        UserName: user.UserName || '',
         TuKhoaTimKiem: searchTerm
-      });
+      }, { silent: true });
       const rows = res.data || res.records || [];
 
       // Map SQL rows to UI product objects
@@ -38,7 +38,7 @@ window.PosService = (function () {
   /** Get customers from SQL */
   async function getCustomers() {
     try {
-      const res = await Http.get(EP.GET_CUSTOMERS);
+      const res = await Http.get(EP.GET_CUSTOMERS, {}, { silent: true });
       const rows = res.data || res.records || [];
       return rows.map(r => ({
         id: r.ObjectID,
@@ -55,8 +55,8 @@ window.PosService = (function () {
   async function getBranches() {
     const user = AuthService.getUser();
     try {
-      const res = await Http.get(EP.GET_BRANCHES, { 
-        UserName: user.UserName || 'admin' 
+      const res = await Http.get(EP.GET_BRANCHES, {
+        UserName: user.UserName || ''
       });
       return res.data || res.records || [];
     } catch (e) {
@@ -111,7 +111,7 @@ window.PosService = (function () {
         name: r.name || r.Name || ''
       }));
     } catch (e) {
-      return [{ id: 'HOAN_THANH', name: 'Hoàn thành' }];
+      return [];
     }
   }
 
@@ -125,7 +125,7 @@ window.PosService = (function () {
         name: r.name || r.Name || ''
       }));
     } catch (e) {
-      return [{ id: 'TIENMAT', name: 'Tiền mặt' }];
+      return [];
     }
   }
 

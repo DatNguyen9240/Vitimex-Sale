@@ -10,7 +10,7 @@
 
 /* ── Header ─────────────────────────────────── */
 .order-table thead th {
-  background: #f0f0f0;
+  background: var(--color-surface-muted);
   border: 1px solid var(--color-border);
   padding: 6px 8px;
   font-weight: var(--font-weight-semibold);
@@ -28,7 +28,7 @@
   border-bottom: 1px solid var(--color-border);
   transition: background var(--transition-fast);
 }
-.order-table tbody tr:hover { background: #fafafa; }
+.order-table tbody tr:hover { background: var(--color-surface-hover); }
 .order-table tbody td {
   padding: 6px 8px; border-right: 1px solid var(--color-border);
   vertical-align: middle;
@@ -79,11 +79,8 @@
 .order-empty .empty-icon { font-size: 3rem; opacity: 0.25; }
 .order-empty .empty-text { font-size: var(--font-size-md); }
 .order-empty .empty-hint { font-size: var(--font-size-sm); opacity: 0.75; }
+.order-table-empty-wrap { position: relative; height: 100%; }
+.order-empty .empty-icon svg { opacity: 0.25; }
 
-/* ── Vitimex logo watermark ──────────────────── */
-.pos-watermark {
-  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
-  pointer-events: none; opacity: 0.04; user-select: none;
-  font-size: 5rem; font-weight: 900; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--color-text);
-}
+
+

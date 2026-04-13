@@ -6,7 +6,8 @@
 :root {
   --auth-bg: #0a0a0a;
   --auth-card-bg: #ffffff;
-  --auth-primary: #C42027; /* Vitimex Red */
+  --auth-primary: #C42027;
+  /* Vitimex Red */
   --auth-text: #1a1a1a;
   --auth-text-muted: #666666;
 }
@@ -19,7 +20,7 @@
   align-items: center;
   justify-content: center;
   background-color: var(--auth-bg);
-  background-image: 
+  background-image:
     radial-gradient(circle at 20% 20%, rgba(196, 32, 39, 0.05) 0%, transparent 40%),
     radial-gradient(circle at 80% 80%, rgba(196, 32, 39, 0.05) 0%, transparent 40%);
   font-family: var(--font-family);
@@ -33,15 +34,22 @@
 }
 
 @keyframes authFadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .auth-card {
   background: var(--auth-card-bg);
   padding: 48px 40px;
   border-radius: 24px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 /* ── Header ──────────────────────────────── */
@@ -59,8 +67,14 @@
   margin-bottom: 8px;
 }
 
-.vitimex-logo .v { color: var(--auth-primary); }
-.vitimex-logo .i { color: #000; margin-left: -2px; }
+.vitimex-logo .v {
+  color: var(--auth-primary);
+}
+
+.vitimex-logo .i {
+  color: #000;
+  margin-left: -2px;
+}
 
 .auth-subtitle {
   color: var(--auth-text-muted);
@@ -143,14 +157,16 @@
 .btn-loader {
   width: 18px;
   height: 18px;
-  border: 2px solid rgba(255,255,255,0.3);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   border-top-color: #fff;
   border-radius: 50%;
   animation: authSpin 0.8s linear infinite;
 }
 
 @keyframes authSpin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ── Error ───────────────────────────────── */

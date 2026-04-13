@@ -20,12 +20,12 @@ $(function () {
 
   // ── Customer search dropdown ─────────────────────────────────────────────
   let _customerDropdownVisible = false;
-  let _orderStatuses = [];  
-  let _paymentMethods = []; 
+  let _orderStatuses = [];
+  let _paymentMethods = [];
 
   // ── View Options per tab ─────────────────────────────────────────────────
   // Stores { orderDisc, service, vat } per orderId
-  const _displayOpts = {}; 
+  const _displayOpts = {};
 
   /** Helper to get display options for an order */
   function getOpts(id) {
@@ -44,7 +44,7 @@ $(function () {
     ]).catch(err => {
       console.error('[App] Initialization error:', err);
     });
-    
+
     // Sync user info to UI (Medstand Pattern)
     AuthService.syncUserDisplay('#current-branch');
     $('.branch-icon').text('👤');
@@ -102,10 +102,11 @@ $(function () {
 
     if (!order || order.items.length === 0) {
       $wrap.html(`
-        <div style="position:relative;height:100%;">
-          <div class="pos-watermark">VITIMEX</div>
+        <div class="order-table-empty-wrap">
           <div class="order-empty">
-            <div class="empty-icon">🛍️</div>
+            <div class="empty-icon">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+            </div>
             <div class="empty-text">Chưa có mặt hàng nào trong danh sách</div>
             <div class="empty-hint">Sử dụng thanh tìm kiếm <kbd>F1</kbd> hoặc chọn sản phẩm bên dưới</div>
           </div>
@@ -118,6 +119,7 @@ $(function () {
       rows += `
         <tr data-item-id="${item.id}">
           <td class="row-num">
+            <span class="row-idx">${idx + 1}</span>
             <button class="row-del" data-del="${item.id}" title="Xóa dòng">×</button>
           </td>
           <td>${item.product.code}</td>
@@ -204,16 +206,15 @@ $(function () {
             value="${custName}" autocomplete="off">
           <button class="btn-add-customer" id="btn-add-customer" title="Thêm khách mới">+</button>
         </div>
-        <div id="customer-dropdown" class="hidden" style="position:relative;z-index:50;"></div>
+        <div id="customer-dropdown" class="customer-dropdown hidden"></div>
 
         <!-- Status -->
         <div class="status-row">
           <label>Trạng thái</label>
-          <select id="order-status" class="form-input form-select" style="flex:1;">${statusOpts}</select>
-          <span style="font-size:var(--font-size-xs);color:var(--color-text-muted);">${Fmt.datetimeShort()}</span>
+          <select id="order-status" class="form-input form-select status-row-select">${statusOpts}</select>
         </div>
 
-        <hr class="divider" style="margin-bottom:8px;">
+        <hr class="divider sidebar-divider">
 
         <!-- Bill rows -->
         <div class="bill-rows">
@@ -225,9 +226,9 @@ $(function () {
             <span class="bill-row-label">Điểm thưởng</span>
             <input class="bill-row-input" id="val-points" type="number" min="0" value="0" placeholder="0">
           </div>
-          <div class="bill-row">
-            <span class="bill-row-label">Mã giảm giá</span>
-            <input class="bill-row-input" id="val-voucher" placeholder="Nhập mã..." style="width:90px;">
+          <div class="bill-row bill-row-voucher-wrap">
+            <input class="bill-row-voucher-input" id="val-voucher" placeholder="Nhập mã giảm giá...">
+            <span class="bill-row-value" id="val-voucher-amt">—</span>
           </div>
           <div class="bill-row">
             <span class="bill-row-label">Chiết khấu (₫)</span>
@@ -259,10 +260,10 @@ $(function () {
         </div>
 
         <!-- Customer cash input -->
-        <div class="bill-row" style="margin-top:4px;">
+        <div class="bill-row bill-row-cash">
           <span class="bill-row-label">Tiền khách trả</span>
           <input class="bill-row-input" id="val-customer-cash" type="number" min="0"
-            value="${order.payments[0]?.amount || ''}" placeholder="0" style="width:100px;">
+            value="${order.payments[0]?.amount || ''}" placeholder="0">
         </div>
 
         <!-- Denomination buttons -->
@@ -280,7 +281,10 @@ $(function () {
         <!-- Payment methods -->
         <div class="payment-methods">
           <div class="payment-methods-header">
-            <span class="payment-methods-label">💳 Tài khoản</span>
+            <span class="payment-methods-label" style="display:flex;align-items:center;gap:6px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+              Tài khoản
+            </span>
             <button class="btn-ghost btn-sm" id="btn-add-payment">+ Thêm</button>
           </div>
           <div id="payment-method-list">${payRows}</div>
@@ -295,10 +299,12 @@ $(function () {
 
       <!-- Action buttons -->
       <div class="payment-actions">
-        <button class="btn-print" id="btn-print" title="In hóa đơn">🖨️</button>
+        <button class="btn-print" id="btn-print" title="In hóa đơn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        </button>
         <button class="btn-checkout" id="btn-checkout">
           <span>Thanh toán</span>
-          <span style="font-size:0.8em;opacity:0.85;">(${Fmt.currency(calc.total)})</span>
+          <span class="btn-checkout-sub">(${Fmt.currency(calc.total)})</span>
         </button>
       </div>`);
   }
@@ -306,7 +312,7 @@ $(function () {
   /** Render quick-select product grid */
   function renderQuickGrid() {
     if (_isLoadingQuick) {
-      $('#quick-grid').html('<div class="quick-grid-loader">⏳ Đang tải hàng hóa...</div>');
+      $('#quick-grid').html('<div class="quick-grid-loader"><svg class="spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Đang tải hàng hóa...</div>');
       return;
     }
 
@@ -320,31 +326,62 @@ $(function () {
       ).join('');
       const imgHtml = p.img
         ? `<img class="product-card-img" src="${p.img}" alt="${p.name}" loading="lazy">`
-        : `<div class="product-card-img-placeholder">👔</div>`;
+        : `<div class="product-card-img-placeholder">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.62 1.96V21a1 1 0 001 1h18a1 1 0 001-1V5.42a2 2 0 00-1.62-1.96z"></path><path d="M10 22V7"></path><path d="M14 22V7"></path><path d="M12 7V2"></path></svg>
+           </div>`;
 
       return `
         <div class="product-card" data-product-id="${p.id}">
+          <div class="product-card-price">${Fmt.currency(p.price)}</div>
           ${p.hot ? '<span class="product-card-badge">HOT</span>' : ''}
           ${imgHtml}
           <div class="product-card-info">
             <div class="product-card-name">${p.name}</div>
-            <div class="product-card-price">${Fmt.currency(p.price)}</div>
           </div>
           <div class="product-card-sizes">${sizeBtns}</div>
         </div>`;
     }).join('');
 
+    const nowStr = new Date().toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const order = OrderManager.getActive();
+    const orderCode = order ? (order.code || '') : ''; // Chỉ hiện code thực tế
+
     $('#quick-grid').html(`
-      <div class="quick-grid-header">
-        <span style="font-size:var(--font-size-xs);color:var(--color-text-muted);font-weight:600;">
-          ⚡ SẢN PHẨM BÁN NHANH
-        </span>
-        <span style="font-size:var(--font-size-xs);color:var(--color-text-muted);">(${_quickProducts.length} sản phẩm)</span>
-        <div class="pg-info">
-          <button class="pg-btn" id="pg-prev" ${_quickPage === 0 ? 'disabled' : ''}>‹</button>
-          <span style="font-size:var(--font-size-xs);">${_quickPage + 1} / ${totalPages}</span>
-          <button class="pg-btn" id="pg-next" ${_quickPage >= totalPages - 1 ? 'disabled' : ''}>›</button>
-        </div>
+      <div class="qgt-toolbar">
+        <input class="qgt-order-code" id="qgt-order-code" placeholder="Tự động tạo mã (Đơn hàng)" value="${orderCode}" autocomplete="off">
+
+        <div class="qgt-vsep"></div>
+
+        <button class="qgt-btn" id="btn-qgt-note">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Ghi chú
+        </button>
+
+        <span class="qgt-datetime" id="qgt-datetime">${nowStr}</span>
+
+        <div class="qgt-vsep"></div>
+
+        <button class="qgt-icon-btn" title="Lịch">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </button>
+        <button class="qgt-icon-btn" title="Lịch sử">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </button>
+
+        <div class="qgt-vsep"></div>
+
+        <button class="pg-btn" id="pg-prev" ${_quickPage === 0 ? 'disabled' : ''}>‹</button>
+        <span class="qgt-page-num">${_quickPage + 1} / ${totalPages}</span>
+        <button class="pg-btn" id="pg-next" ${_quickPage >= totalPages - 1 ? 'disabled' : ''}>›</button>
+
+        <div class="qgt-vsep"></div>
+
+        <button class="qgt-icon-btn" title="In hóa đơn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        </button>
+        <button class="qgt-icon-btn qgt-icon-btn-accent" title="Tùy chọn">
+          <svg width="11" height="11" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 1 5 5 9 1"/></svg>
+        </button>
       </div>
       <div class="quick-grid-body">${cards}</div>`);
   }
@@ -370,7 +407,7 @@ $(function () {
     const changeLabel = calc.change >= 0 ? 'Tiền thừa' : 'Tiền khách nợ';
     $('.change-label').text(changeLabel);
     $('#val-change').removeClass('positive negative').addClass(changeClass).text(Fmt.currency(Math.abs(calc.change)));
-    $('#btn-checkout').html(`<span>Thanh toán</span><span style="font-size:0.8em;opacity:0.85;">(${Fmt.currency(calc.total)})</span>`);
+    $('#btn-checkout').html(`<span>Thanh toán</span><span class="btn-checkout-sub">(${Fmt.currency(calc.total)})</span>`);
     // Sync mobile FAB
     document.dispatchEvent(new CustomEvent('vitimex:fab-update', { detail: { total: Fmt.currency(calc.total) } }));
   }
@@ -438,8 +475,9 @@ $(function () {
     OrderManager.addItem(product, size);
     renderOrderTable();
     updateTotals();
-    $(this).css('background', '#000').css('color', '#fff');
-    setTimeout(() => $(this).css('background', '').css('color', ''), 300);
+    const $this = $(this);
+    $this.addClass('active-flash');
+    setTimeout(() => $this.removeClass('active-flash'), 300);
     Toast.success(`Đã thêm ${product.name} (${size})`);
   });
 
@@ -465,46 +503,106 @@ $(function () {
     if (_quickPage < total - 1) { _quickPage++; renderQuickGrid(); }
   });
 
+  // ── Topbar Search (Dropdown Predictive) ────────────────────────────────────
+  let _topSearchTimeout = null;
   $(document).on('input', '#topbar-search-input', function () {
     const q = $(this).val().trim();
-    loadProducts(q);
+    clearTimeout(_topSearchTimeout);
+    _topSearchTimeout = setTimeout(async () => {
+      const dd = $('#topbar-search-dropdown');
+      if (!q) { dd.addClass('hidden').html(''); return; }
+      
+      const results = await PosService.searchProducts(q);
+      if (!results.length) { dd.addClass('hidden').html(''); return; }
+
+      let html = '';
+      // Limit to 6 items to keep dropdown compact
+      results.slice(0, 6).forEach(p => {
+        const imgHtml = p.img 
+          ? `<img class="ts-item-img" src="${p.img}">` 
+          : `<div class="ts-item-img" style="display:flex;align-items:center;justify-content:center;font-size:10px;">IMG</div>`;
+        html += `
+          <div class="topbar-search-item" data-search-prod-id="${p.id}">
+            ${imgHtml}
+            <div class="ts-item-info">
+              <span class="ts-item-name">${p.name}</span>
+              <span class="ts-item-code">${p.code}</span>
+            </div>
+            <div class="ts-item-price">${Fmt.currency(p.price)}</div>
+          </div>
+        `;
+      });
+      dd.removeClass('hidden').html(html);
+    }, 300);
+  });
+
+  // Chọn sản phẩm từ Dropdown
+  $(document).on('click', '[data-search-prod-id]', async function () {
+    const pId = $(this).data('search-prod-id');
+    try {
+      const prod = await PosService.getProductDetails(pId);
+      const activeId = OrderManager.getActiveId();
+      // Mặc định chọn size đầu tiên nếu có để Add nhanh
+      const size = prod.sizes && prod.sizes.length > 0 ? prod.sizes[0] : '';
+      OrderManager.addItem(activeId, prod, size);
+      
+      // Update UI
+      renderOrderTable();
+      updateTotals();
+      
+      // Đóng dropdown & dọn input
+      $('#topbar-search-input').val('');
+      $('#topbar-search-dropdown').addClass('hidden').html('');
+      Toast.success(`Đã thêm ${prod.name}`);
+    } catch(e) {}
+  });
+
+  // Đóng dropdown khi click ra ngoài
+  $(document).on('click', function (e) {
+    if (!$(e.target).closest('.topbar-search').length) {
+      $('#topbar-search-dropdown').addClass('hidden');
+    }
   });
 
   // ── F1 shortcut ────────────────────────────────────────────────────────────
-  $(document).on('keydown', function (e) {
-    if (e.key === 'F1') {
+  window.addEventListener('keydown', function (e) {
+    if (e.key === 'F1' || e.keyCode === 112) {
       e.preventDefault();
-      $('#topbar-search-input').focus().select();
+      const searchInput = document.getElementById('topbar-search-input');
+      if (searchInput) {
+        searchInput.focus();
+        searchInput.select();
+      }
     }
   });
 
   // ── Customer search ───────────────────────────────────────────────────────
-  $(document).on('input', '#customer-search', async function () {
+  let _custSearchTimeout = null;
+  $(document).on('input', '#customer-search', function () {
     const q = $(this).val().trim();
-    if (!q) { $('#customer-dropdown').addClass('hidden').html(''); return; }
+    clearTimeout(_custSearchTimeout);
+    _custSearchTimeout = setTimeout(async () => {
+      if (!q) { $('#customer-dropdown').addClass('hidden').html(''); return; }
 
-    // In real app, we might call PosService.getCustomers() filter here
-    const results = await PosService.getCustomers();
-    const filtered = results.filter(c =>
-      c.name.toLowerCase().includes(q.toLowerCase()) || c.phone.includes(q)
-    );
+      // In real app, we might call PosService.getCustomers() filter here
+      const results = await PosService.getCustomers();
+      const filtered = results.filter(c =>
+        c.name.toLowerCase().includes(q.toLowerCase()) || c.phone.includes(q)
+      );
 
-    if (!filtered.length) { $('#customer-dropdown').addClass('hidden').html(''); return; }
+      if (!filtered.length) { $('#customer-dropdown').addClass('hidden').html(''); return; }
 
-    let html = `<div style="position:absolute;top:0;left:0;right:0;
-      background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-md);
-      box-shadow:var(--shadow-md);z-index:100;overflow:hidden;">`;
-    filtered.slice(0, 5).forEach(c => {
-      html += `<div class="customer-dropdown-item" data-cust-id="${c.id}"
-        style="padding:8px 12px;cursor:pointer;font-size:var(--font-size-sm);
-        border-bottom:1px solid var(--color-border);transition:background 0.12s;"
-        onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background=''">
-        <div style="font-weight:600;">${c.name}</div>
-        <div style="color:var(--color-text-muted);font-size:var(--font-size-xs);">${c.phone}</div>
-      </div>`;
-    });
-    html += '</div>';
-    $('#customer-dropdown').removeClass('hidden').html(html);
+      let html = `<div class="customer-dropdown-results">`;
+      filtered.slice(0, 5).forEach(c => {
+        html += `
+        <div class="customer-item" data-cust-id="${c.id}">
+          <div class="customer-name-label">${c.name}</div>
+          <div class="customer-phone-label">${c.phone}</div>
+        </div>`;
+      });
+      html += '</div>';
+      $('#customer-dropdown').removeClass('hidden').html(html);
+    }, 300);
   });
 
   $(document).on('click', '[data-cust-id]', async function () {
@@ -599,7 +697,10 @@ $(function () {
     if (calc.change < 0) { Toast.error('Khách chưa thanh toán đủ!'); return; }
 
     const $btn = $(this);
-    $btn.prop('disabled', true).text('⌛ Đang xử lý...');
+    $btn.prop('disabled', true).html(`
+      <svg class="spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
+      Đang xử lý...
+    `);
 
     try {
       await PosService.saveOrder(order, opts);
@@ -615,6 +716,18 @@ $(function () {
     } finally {
       $btn.prop('disabled', false);
       updateTotals();
+    }
+  });
+
+  // ── Quick grid — order code sync ──────────────────────────────────────────
+  $(document).on('input', '#qgt-order-code', function () {
+    const order = OrderManager.getActive();
+    if (order) {
+      const val = $(this).val();
+      order.code = val;
+      // Nếu xóa mã, quay lại nhãn mặc định (có số) thay vì chữ "Đơn hàng" trống
+      order.label = val || order.defaultLabel || 'Đơn hàng';
+      renderTabs(); // Cập nhật UI tab ngay lập tức
     }
   });
 
@@ -640,7 +753,7 @@ $(function () {
 
   // ── Print ──────────────────────────────────────────────────────────────────
   $(document).on('click', '#btn-print', function () {
-    Toast.show('🖨️ Đang gửi lệnh in...', '');
+    Toast.show('Đang gửi lệnh in...', '');
   });
 
   // ────────────────────────────────────────────────────────────────────────

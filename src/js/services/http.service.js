@@ -96,11 +96,11 @@ const Http = (() => {
 
   // ─── Public methods ────────────────────────────────────────────────────────
 
-  async function get(endpoint, params = {}) {
+  async function get(endpoint, params = {}, options = {}) {
     const qs = new URLSearchParams(params).toString();
     const url = _url(endpoint) + (qs ? `?${qs}` : '');
 
-    showGlobalSpinner();
+    if (!options.silent) showGlobalSpinner();
     try {
       const res = await _fetchWithTimeout(url, {
         method: 'GET',
@@ -109,12 +109,12 @@ const Http = (() => {
       const data = await _handleResponse(res, endpoint);
       return data;
     } finally {
-      hideGlobalSpinner();
+      if (!options.silent) hideGlobalSpinner();
     }
   }
 
-  async function post(endpoint, body = {}) {
-    showGlobalSpinner();
+  async function post(endpoint, body = {}, options = {}) {
+    if (!options.silent) showGlobalSpinner();
     try {
       const res = await _fetchWithTimeout(_url(endpoint), {
         method: 'POST',
@@ -124,7 +124,7 @@ const Http = (() => {
       const data = await _handleResponse(res, endpoint);
       return data;
     } finally {
-      hideGlobalSpinner();
+      if (!options.silent) hideGlobalSpinner();
     }
   }
 

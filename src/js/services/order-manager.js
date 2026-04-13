@@ -9,9 +9,11 @@ const OrderManager = (() => {
   // ── Create a new blank order ────────────────────────────────────────────
   function _newOrder(label) {
     const id = 'order_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5);
+    const defLabel = label || ('Đơn hàng ' + (_orders.length + 1));
     return {
       id,
-      label: label || ('Đơn hàng ' + (_orders.length + 1)),
+      label: defLabel,
+      defaultLabel: defLabel,
       customer: null,
       status: 'HOAN_THANH',
       items: [],          // { product, size, qty, unitPrice, discPct, discAmt, total }

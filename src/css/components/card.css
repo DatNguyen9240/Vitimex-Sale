@@ -25,7 +25,7 @@
 
 .card-title {
   font-size: var(--font-size-md);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: var(--color-text);
   margin: 0;
 }
