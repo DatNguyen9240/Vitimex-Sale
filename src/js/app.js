@@ -71,7 +71,6 @@ $(function () {
       _paymentMethods = methods;
       _employees = employees;
       _banks = banks;
-      console.log('[App] Metadata loaded:', { statuses, methods, employees, banks: banks.length });
     } catch (e) {
       console.error('[App] Failed to load metadata:', e);
     }
@@ -202,16 +201,16 @@ $(function () {
       if (pay.methodId === 'CK') {
         const bankOpts = `<option value="">--Chọn Ngân hàng--</option>` + (_banks || []).map(b => {
           const isSelected = (pay.bankId || '').toString().trim().toUpperCase() === (b.id || '').toString().trim().toUpperCase();
-          if (isSelected) console.log(`[Bank] Match found for row ${idx}:`, b.id);
           return `<option value="${b.id}" ${isSelected ? 'selected' : ''}>${b.name}</option>`;
         }).join('');
-        
+
         bankSelectHtml = `
           <div class="bank-selection-row" style="margin-top: 4px; padding-left: 10px;">
-            <select class="form-input form-select pay-bank-select" style="font-size: 11px; height: 26px;" data-pay-bank="${idx}">
+            <select class="meta-input" data-pay-bank="${idx}">
               ${bankOpts}
             </select>
           </div>`;
+
       }
 
       payRows += `
@@ -843,7 +842,7 @@ $(function () {
     const order = OrderManager.getActive();
     if (order && order.payments[idx]) {
       order.payments[idx].bankId = val ? val.toString().trim() : '';
-      renderPaymentSidebar(); // Cập nhật lại giao diện để hiển thị đúng lựa chọn
+      // Không re-render - select tự giữ state, re-render sẽ reset lại dropdown
     }
   });
 
