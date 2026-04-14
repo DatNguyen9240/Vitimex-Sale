@@ -157,6 +157,24 @@
   cursor: default;
 }
 
+/* Collapsed state — hạ xuống luôn */
+#quick-grid.collapsed {
+  height: auto !important;
+}
+
+#quick-grid.collapsed .quick-grid-body {
+  display: none !important;
+}
+
+#quick-grid.collapsed .qgt-toolbar {
+  border-bottom: none;
+}
+
+/* Icon rotation: mặc định là v (mở), khi collapsed xuyến 180 độ thành ^ (để kéo lên) */
+#quick-grid.collapsed #btn-toggle-quickgrid svg {
+  transform: rotate(180deg);
+}
+
 .quick-grid-body {
   flex: 1;
   overflow: hidden;

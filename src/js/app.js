@@ -449,10 +449,10 @@ $(function () {
 
         <div class="qgt-vsep"></div>
 
-        <button class="qgt-icon-btn" title="In hóa đơn">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        <button class="qgt-icon-btn" id="btn-open-filter" title="Lọc sản phẩm">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
         </button>
-        <button class="qgt-icon-btn qgt-icon-btn-accent" title="Tùy chọn">
+        <button class="qgt-icon-btn qgt-icon-btn-accent" id="btn-toggle-quickgrid" title="Ẩn/Hiện lưới sản phẩm">
           <svg width="11" height="11" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 1 5 5 9 1"/></svg>
         </button>
       </div>
@@ -973,6 +973,15 @@ $(function () {
       $btn.prop('disabled', false);
       updateTotals();
     }
+  });
+
+  // ── Quick grid toolbar actions ────────────────────────────────────────────
+  $(document).on('click', '#btn-open-filter', function () {
+    Modal.show('modal-filter');
+  });
+
+  $(document).on('click', '#btn-toggle-quickgrid', function () {
+    $('#quick-grid').toggleClass('collapsed');
   });
 
   // ── Quick grid — order code sync ──────────────────────────────────────────
