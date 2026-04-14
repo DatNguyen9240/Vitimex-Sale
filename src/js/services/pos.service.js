@@ -62,7 +62,11 @@ window.PosService = (function () {
   async function getCustomerGroups() {
     try {
       const res = await Http.get(EP.GET_CUSTOMER_GROUPS, {}, { silent: true });
-      return res.data || res.records || [];
+      const rows = res.data || res.records || [];
+      return rows.map(r => ({
+        id: r.ObjectGroupID,
+        name: r.ObjectGroupName
+      }));
     } catch (e) {
       return [];
     }

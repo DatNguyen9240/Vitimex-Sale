@@ -25,6 +25,7 @@ $(function () {
   let _paymentMethods = [];
   let _banks = [];
   let _employees = [];
+  let _customerGroups = [];
 
   // ── View Options per tab ─────────────────────────────────────────────────
   // Stores { orderDisc, service, vat } per orderId
@@ -61,16 +62,18 @@ $(function () {
 
   async function loadMetadata() {
     try {
-      const [statuses, methods, employees, banks] = await Promise.all([
+      const [statuses, methods, employees, banks, groups] = await Promise.all([
         PosService.getOrderStatuses(),
         PosService.getPaymentMethods(),
         PosService.getEmployees(),
-        PosService.getBanks()
+        PosService.getBanks(),
+        PosService.getCustomerGroups()
       ]);
       _orderStatuses = statuses;
       _paymentMethods = methods;
       _employees = employees;
       _banks = banks;
+      _customerGroups = groups;
     } catch (e) {
       console.error('[App] Failed to load metadata:', e);
     }
@@ -981,6 +984,16 @@ $(function () {
 
   // ── Quick grid toolbar actions ────────────────────────────────────────────
   $(document).on('click', '#btn-open-filter', function () {
+    // Populate customer groups in filter modal
+    const $select = $('#filter-group');
+    if ($select.length && _customerGroups.length) {
+      const currentVal = $select.val();
+      let html = '<option value="">-- Chọn nhóm --</option>';
+      _customerGroups.forEach(g => {
+        html += `<option value="${g.id}">${g.name}</option>`;
+      });
+      $select.html(html).val(currentVal);
+    }
     Modal.show('modal-filter');
   });
 
