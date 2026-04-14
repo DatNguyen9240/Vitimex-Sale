@@ -20,8 +20,11 @@ $(function () {
 
   // ── Customer search dropdown ─────────────────────────────────────────────
   let _customerDropdownVisible = false;
+  let _topSearchResults = []; // Cache for search dropdown
   let _orderStatuses = [];
   let _paymentMethods = [];
+  let _banks = [];
+  let _employees = [];
 
   // ── View Options per tab ─────────────────────────────────────────────────
   // Stores { orderDisc, service, vat } per orderId
@@ -37,30 +40,38 @@ $(function () {
 
   // ── Initialization ───────────────────────────────────────────────────────
   async function init() {
-    OrderManager.init();
-    await Promise.all([
-      loadProducts(),
-      loadMetadata()
-    ]).catch(err => {
-      console.error('[App] Initialization error:', err);
-    });
+    console.log('[App] Initializing POS...');
+    try {
+      OrderManager.init();
+      await Promise.all([
+        loadProducts(),
+        loadMetadata()
+      ]);
 
-    // Sync user info to UI (Medstand Pattern)
-    AuthService.syncUserDisplay('#current-branch');
-    $('.branch-icon').text('👤');
+      // Sync user info to UI (Medstand Pattern)
+      AuthService.syncUserDisplay('#current-branch');
+      $('.branch-icon').text('👤');
 
-    renderAll();
-    console.log('[Vitimex POS] App initialized with LIVE API ✓');
+      renderAll();
+      console.log('[Vitimex POS] App initialized ✓');
+    } catch (err) {
+      console.error('[App] Critical Initialization error:', err);
+    }
   }
 
   async function loadMetadata() {
     try {
-      const [statuses, methods] = await Promise.all([
+      const [statuses, methods, employees, banks] = await Promise.all([
         PosService.getOrderStatuses(),
-        PosService.getPaymentMethods()
+        PosService.getPaymentMethods(),
+        PosService.getEmployees(),
+        PosService.getBanks()
       ]);
       _orderStatuses = statuses;
       _paymentMethods = methods;
+      _employees = employees;
+      _banks = banks;
+      console.log('[App] Metadata loaded:', { statuses, methods, employees, banks: banks.length });
     } catch (e) {
       console.error('[App] Failed to load metadata:', e);
     }
@@ -175,24 +186,53 @@ $(function () {
     const custName = order.customer ? order.customer.name : '';
 
     // Status options
-    const statusOpts = statuses.map(s =>
+    const statusOpts = (statuses || []).map(s =>
       `<option value="${s.id}" ${order.status === s.id ? 'selected' : ''}>${s.name}</option>`
     ).join('');
 
     // Payment method rows
     let payRows = '';
     order.payments.forEach((pay, idx) => {
-      const opts2 = methods.map(m =>
+      const opts2 = (_paymentMethods || []).map(m =>
         `<option value="${m.id}" ${pay.methodId === m.id ? 'selected' : ''}>${m.name}</option>`
       ).join('');
+
+      // If method is CK (Chuyển khoản), show bank list
+      let bankSelectHtml = '';
+      if (pay.methodId === 'CK') {
+        const bankOpts = `<option value="">--Chọn Ngân hàng--</option>` + (_banks || []).map(b => {
+          const isSelected = (pay.bankId || '').toString().trim().toUpperCase() === (b.id || '').toString().trim().toUpperCase();
+          if (isSelected) console.log(`[Bank] Match found for row ${idx}:`, b.id);
+          return `<option value="${b.id}" ${isSelected ? 'selected' : ''}>${b.name}</option>`;
+        }).join('');
+        
+        bankSelectHtml = `
+          <div class="bank-selection-row" style="margin-top: 4px; padding-left: 10px;">
+            <select class="form-input form-select pay-bank-select" style="font-size: 11px; height: 26px;" data-pay-bank="${idx}">
+              ${bankOpts}
+            </select>
+          </div>`;
+      }
+
       payRows += `
-        <div class="payment-method-item" data-pay-idx="${idx}">
-          <select class="form-input form-select pay-method-select" data-pay-method="${idx}">${opts2}</select>
-          <input class="form-input pay-method-amount" type="number" min="0"
-            data-pay-amount="${idx}" value="${pay.amount || ''}" placeholder="Số tiền">
-          <button class="pay-method-del" data-pay-del="${idx}" title="Xóa">×</button>
+        <div class="payment-method-item-wrap" style="margin-bottom: 8px;">
+          <div class="payment-method-item" data-pay-idx="${idx}">
+            <select class="form-input form-select pay-method-select" data-pay-method="${idx}">${opts2}</select>
+            <input class="form-input pay-method-amount" type="number" min="0"
+              data-pay-amount="${idx}" value="${pay.amount || ''}" placeholder="Số tiền">
+            <button class="pay-method-del" data-pay-del="${idx}" title="Xóa">×</button>
+          </div>
+          ${bankSelectHtml}
         </div>`;
     });
+
+    const user = AuthService.getUser() || { BranchID: 'Hội sở', DisplayName: 'Admin' };
+    if (!order.branchName) order.branchName = user.BranchID || 'Vitimex';
+    if (!order.creatorName) order.creatorName = user.DisplayName || user.UserName || 'Admin';
+
+    const empOpts = `<option value="">--Nhân viên KD--</option>` + (_employees || []).map(e =>
+      `<option value="${e.EmployeeID}" ${order.employeeId === (e.EmployeeID || e.id) ? 'selected' : ''}>${e.EmployeeName || e.name}</option>`
+    ).join('');
 
     // Change/Debt display
     const changeClass = calc.change >= 0 ? 'positive' : 'negative';
@@ -200,70 +240,104 @@ $(function () {
 
     $('#payment-sidebar').html(`
       <div class="payment-body">
-        <!-- Customer -->
-        <div class="customer-search-wrap">
-          <input id="customer-search" class="form-input" placeholder="Tìm khách hàng (tên, SĐT)..."
-            value="${custName}" autocomplete="off">
-          <button class="btn-add-customer" id="btn-add-customer" title="Thêm khách mới">+</button>
-        </div>
-        <div id="customer-dropdown" class="customer-dropdown hidden"></div>
-
-        <!-- Status -->
-        <div class="status-row">
-          <label>Trạng thái</label>
-          <select id="order-status" class="form-input form-select status-row-select">${statusOpts}</select>
+        <!-- Order Metadata (Legacy Style) -->
+        <div class="order-metadata">
+          <div class="meta-row">
+            <div class="meta-field">
+              <label>Số phiếu</label>
+              <input type="text" class="meta-input" value="${order.voucherNo || ''}" readonly>
+            </div>
+            <div class="meta-field">
+              <label>Ngày</label>
+              <input type="text" class="meta-input" value="${Fmt.date(order.date)}" readonly>
+            </div>
+            <div class="meta-field">
+              <label>Nhân viên KD</label>
+              <select id="order-employee" class="meta-input meta-select">${empOpts}</select>
+            </div>
+          </div>
+          <div class="meta-row">
+            <div class="meta-field" style="flex: 2;">
+              <label>Chi nhánh</label>
+              <input type="text" class="meta-input" value="${order.branchName || ''}" readonly>
+            </div>
+            <div class="meta-field">
+              <label>Người lập</label>
+              <input type="text" class="meta-input" value="${order.creatorName || ''}" readonly>
+            </div>
+          </div>
+          <div class="meta-row">
+            <div class="meta-field">
+              <label>% CK hạng</label>
+              <input type="number" id="val-orderdisc" class="meta-input" value="${opts.orderDisc || ''}" placeholder="0">
+            </div>
+            <div class="meta-field">
+              <label>Xếp hạng</label>
+              <input type="text" id="order-rank" class="meta-input" value="${order.rank || ''}" readonly>
+            </div>
+            <div class="meta-field">
+              <label>Ngày sinh</label>
+              <input type="text" id="order-birthday" class="meta-input" value="${order.birthday || ''}" placeholder="dd/mm/yyyy">
+            </div>
+          </div>
+          <div class="meta-row" style="margin-top: 4px;">
+            <div class="meta-field">
+              <label class="text-accent" style="color: var(--color-accent) !important;">Tổng tiền</label>
+              <input type="text" class="meta-input text-bold" value="${Fmt.currency(calc.total)}" readonly style="color: var(--color-accent); font-size: 14px;">
+            </div>
+            <div class="meta-field">
+              <label>Khách đưa</label>
+              <input type="number" id="val-customer-cash" class="meta-input" value="${order.payments[0]?.amount || ''}" placeholder="0">
+            </div>
+            <div class="meta-field">
+              <label>Trả lại</label>
+              <input type="text" class="meta-input" value="${Fmt.currency(calc.change >= 0 ? calc.change : 0)}" readonly>
+            </div>
+          </div>
+          <div class="meta-field" style="margin-top: 4px;">
+            <label>Diễn giải</label>
+            <textarea id="order-description" class="meta-input" rows="1" placeholder="Ghi chú đơn hàng...">${order.description || ''}</textarea>
+          </div>
         </div>
 
         <hr class="divider sidebar-divider">
 
-        <!-- Bill rows -->
-        <div class="bill-rows">
-          <div class="bill-row">
-            <span class="bill-row-label">Tổng tiền hàng</span>
-            <span class="bill-row-value" id="val-subtotal">${Fmt.currency(calc.subtotal)}</span>
+          <div class="meta-row">
+            <div class="meta-field" style="flex: 2; position: relative;">
+              <label>Số điện thoại KH</label>
+              <div class="meta-input-group">
+                <input id="customer-phone" class="meta-input" placeholder="Tìm SĐT..." value="${order.customer?.phone || ''}" autocomplete="off">
+                <button class="btn-meta-action" id="btn-add-customer" title="Thêm khách mới">+</button>
+              </div>
+              <div id="customer-dropdown" class="customer-dropdown hidden"></div>
+            </div>
+            <div class="meta-field" style="flex: 3;">
+              <label>Tên khách hàng</label>
+              <div class="meta-input-group">
+                <input id="customer-name" class="meta-input" placeholder="Tên khách hàng" value="${order.customer?.name || ''}">
+                <button type="button" class="btn-meta-action" id="btn-show-customers">...</button>
+              </div>
+            </div>
           </div>
-          <div class="bill-row">
-            <span class="bill-row-label">Điểm thưởng</span>
-            <input class="bill-row-input" id="val-points" type="number" min="0" value="0" placeholder="0">
-          </div>
-          <div class="bill-row bill-row-voucher-wrap">
-            <input class="bill-row-voucher-input" id="val-voucher" placeholder="Nhập mã giảm giá...">
-            <span class="bill-row-value" id="val-voucher-amt">—</span>
-          </div>
-          <div class="bill-row">
-            <span class="bill-row-label">Chiết khấu (₫)</span>
-            <input class="bill-row-input" id="val-orderdisc" type="number" min="0"
-              value="${opts.orderDisc || ''}" placeholder="0">
-          </div>
-          <div class="bill-row">
-            <span class="bill-row-label">
-              Phụ thu dịch vụ
-              <button class="bill-btn-add" id="btn-add-service" title="Thêm phụ thu">+</button>
-            </span>
-            <input class="bill-row-input" id="val-service" type="number" min="0"
-              value="${opts.service || ''}" placeholder="0">
-          </div>
-          <div class="bill-row">
-            <span class="bill-row-label">
-              VAT (%)
-              <button class="bill-btn-add" id="btn-add-vat" title="Thêm VAT">+</button>
-            </span>
-            <input class="bill-row-input" id="val-vat" type="number" min="0" max="100"
-              value="${opts.vat || ''}" placeholder="0">
-          </div>
-        </div>
 
-        <!-- TOTAL -->
-        <div class="bill-total-row">
-          <span class="bill-total-label">Tổng cộng</span>
-          <span class="bill-total-value" id="val-total">${Fmt.currency(calc.total)}</span>
-        </div>
+        <hr class="divider sidebar-divider">
 
-        <!-- Customer cash input -->
-        <div class="bill-row bill-row-cash">
-          <span class="bill-row-label">Tiền khách trả</span>
-          <input class="bill-row-input" id="val-customer-cash" type="number" min="0"
-            value="${order.payments[0]?.amount || ''}" placeholder="0">
+        <!-- Quick Actions (Thao tác nhanh) -->
+        <div class="quick-actions">
+          <div class="meta-row">
+            <div class="meta-field" style="flex: 2;">
+              <select class="meta-input meta-select" id="quick-add-select">
+                <option value="">Thêm nhanh</option>
+                ${(_quickProducts || []).map(p => `<option value="${p.id || p.ProductID}">${p.name || p.ProductName}</option>`).join('')}
+              </select>
+            </div>
+            <div class="meta-field">
+              <input type="number" id="quick-qty" class="meta-input" value="${order.quickQty || 1}" min="1">
+            </div>
+            <div class="meta-field" style="flex: 2;">
+              <input type="text" id="quick-barcode" class="meta-input" placeholder="Barcode">
+            </div>
+          </div>
         </div>
 
         <!-- Denomination buttons -->
@@ -511,15 +585,16 @@ $(function () {
     _topSearchTimeout = setTimeout(async () => {
       const dd = $('#topbar-search-dropdown');
       if (!q) { dd.addClass('hidden').html(''); return; }
-      
+
       const results = await PosService.searchProducts(q);
+      _topSearchResults = results; // Cache results for click/Enter selection
       if (!results.length) { dd.addClass('hidden').html(''); return; }
 
       let html = '';
       // Limit to 6 items to keep dropdown compact
       results.slice(0, 6).forEach(p => {
-        const imgHtml = p.img 
-          ? `<img class="ts-item-img" src="${p.img}">` 
+        const imgHtml = p.img
+          ? `<img class="ts-item-img" src="${p.img}">`
           : `<div class="ts-item-img" style="display:flex;align-items:center;justify-content:center;font-size:10px;">IMG</div>`;
         html += `
           <div class="topbar-search-item" data-search-prod-id="${p.id}">
@@ -537,24 +612,42 @@ $(function () {
   });
 
   // Chọn sản phẩm từ Dropdown
-  $(document).on('click', '[data-search-prod-id]', async function () {
+  $(document).on('click', '[data-search-prod-id]', function () {
     const pId = $(this).data('search-prod-id');
-    try {
-      const prod = await PosService.getProductDetails(pId);
-      const activeId = OrderManager.getActiveId();
-      // Mặc định chọn size đầu tiên nếu có để Add nhanh
+    const prod = _topSearchResults.find(p => p.id === pId);
+    if (!prod) return;
+
+    // Mặc định chọn size đầu tiên nếu có để Add nhanh
+    const size = prod.sizes && prod.sizes.length > 0 ? prod.sizes[0] : '';
+    OrderManager.addItem(prod, size);
+
+    // Update UI
+    renderOrderTable();
+    updateTotals();
+
+    // Đóng dropdown & dọn input
+    $('#topbar-search-input').val('')[0].focus();
+    $('#topbar-search-dropdown').addClass('hidden').html('');
+    Toast.success(`Đã thêm ${prod.name}`);
+  });
+
+  // Hỗ trợ nhấn Enter để chọn sản phẩm đầu tiên
+  $(document).on('keydown', '#topbar-search-input', function (e) {
+    if (e.key === 'Enter') {
+      const q = $(this).val().trim();
+      if (!q || !_topSearchResults.length) return;
+
+      const prod = _topSearchResults[0];
       const size = prod.sizes && prod.sizes.length > 0 ? prod.sizes[0] : '';
-      OrderManager.addItem(activeId, prod, size);
-      
-      // Update UI
+      OrderManager.addItem(prod, size);
+
       renderOrderTable();
       updateTotals();
-      
-      // Đóng dropdown & dọn input
-      $('#topbar-search-input').val('');
+
+      $(this).val('')[0].focus();
       $('#topbar-search-dropdown').addClass('hidden').html('');
       Toast.success(`Đã thêm ${prod.name}`);
-    } catch(e) {}
+    }
   });
 
   // Đóng dropdown khi click ra ngoài
@@ -578,30 +671,30 @@ $(function () {
 
   // ── Customer search ───────────────────────────────────────────────────────
   let _custSearchTimeout = null;
-  $(document).on('input', '#customer-search', function () {
+  $(document).on('input', '#customer-phone, #customer-name', function () {
     const q = $(this).val().trim();
+    const dropdown = $('#customer-dropdown');
     clearTimeout(_custSearchTimeout);
     _custSearchTimeout = setTimeout(async () => {
-      if (!q) { $('#customer-dropdown').addClass('hidden').html(''); return; }
+      if (!q) { dropdown.addClass('hidden').html(''); return; }
 
-      // In real app, we might call PosService.getCustomers() filter here
       const results = await PosService.getCustomers();
       const filtered = results.filter(c =>
-        c.name.toLowerCase().includes(q.toLowerCase()) || c.phone.includes(q)
+        c.name.toLowerCase().includes(q.toLowerCase()) || (c.phone && c.phone.includes(q))
       );
 
-      if (!filtered.length) { $('#customer-dropdown').addClass('hidden').html(''); return; }
+      if (!filtered.length) { dropdown.addClass('hidden').html(''); return; }
 
       let html = `<div class="customer-dropdown-results">`;
       filtered.slice(0, 5).forEach(c => {
         html += `
         <div class="customer-item" data-cust-id="${c.id}">
           <div class="customer-name-label">${c.name}</div>
-          <div class="customer-phone-label">${c.phone}</div>
+          <div class="customer-phone-label">${c.phone || '---'}</div>
         </div>`;
       });
       html += '</div>';
-      $('#customer-dropdown').removeClass('hidden').html(html);
+      dropdown.removeClass('hidden').html(html);
     }, 300);
   });
 
@@ -610,15 +703,69 @@ $(function () {
     const custs = await PosService.getCustomers();
     const cust = custs.find(c => c.id === custId);
     if (cust) {
-      OrderManager.getActive().customer = cust;
-      $('#customer-search').val(cust.name);
-      $('#customer-dropdown').addClass('hidden').html('');
-      Toast.success(`Đã chọn khách: ${cust.name}`);
+      const order = OrderManager.getActive();
+      order.customer = { id: cust.id, name: cust.name, phone: cust.phone };
+      
+      // Auto-fill other metadata
+      if (cust.birthday) {
+        order.birthday = Fmt.date(cust.birthday);
+      }
+
+      // Refresh Sidebar
+      renderPaymentSidebar();
+      Toast.success(`Đã chọn: ${cust.name}`);
+
+      // Close modal if open
+      Modal.hide('modal-customer-selection');
     }
   });
 
+  // ── Customer Modal Selection ──────────────────────────────
+  let _allCustomersCache = [];
+
+  function _renderCustModal(list) {
+    const tbody = $('#cust-modal-tbody');
+    if (!list.length) {
+      tbody.html('<tr><td colspan="4" style="text-align:center; padding: 20px; color: #999;">Không tìm thấy khách hàng</td></tr>');
+      return;
+    }
+    let html = '';
+    list.forEach(c => {
+      html += `
+      <tr data-cust-id="${c.id}">
+        <td><code style="background:#f3f4f6; padding:2px 4px; border-radius:3px;">${c.id}</code></td>
+        <td style="font-weight:600;">${c.name}</td>
+        <td>${c.phone || '---'}</td>
+        <td>${c.birthday || '---'}</td>
+      </tr>`;
+    });
+    tbody.html(html);
+  }
+
+  $(document).on('click', '#btn-show-customers', async function (e) {
+    e.stopPropagation();
+    Modal.show('modal-customer-selection');
+    _allCustomersCache = await PosService.getCustomers();
+    _renderCustModal(_allCustomersCache.slice(0, 50));
+    $('#cust-modal-search').val('')[0].focus();
+  });
+
+  $(document).on('input', '#cust-modal-search', function() {
+    const q = $(this).val().trim().toLowerCase();
+    if (!q) {
+      _renderCustModal(_allCustomersCache.slice(0, 50));
+      return;
+    }
+    const filtered = _allCustomersCache.filter(c => 
+      c.name.toLowerCase().includes(q) || 
+      (c.phone && c.phone.includes(q)) ||
+      c.id.toLowerCase().includes(q)
+    );
+    _renderCustModal(filtered.slice(0, 100));
+  });
+
   $(document).on('click', function (e) {
-    if (!$(e.target).closest('#customer-search, #customer-dropdown').length) {
+    if (!$(e.target).closest('.meta-field, #customer-dropdown').length) {
       $('#customer-dropdown').addClass('hidden');
     }
   });
@@ -680,12 +827,122 @@ $(function () {
     const idx = parseInt($(this).data('pay-method'));
     const order = OrderManager.getActive();
     OrderManager.setPaymentMethod(order, idx, $(this).val());
+    renderPaymentSidebar();
   });
   $(document).on('input', '[data-pay-amount]', function () {
     const idx = parseInt($(this).data('pay-amount'));
     const order = OrderManager.getActive();
     OrderManager.setPaymentAmount(order, idx, $(this).val());
+    renderOrderTable();
     updateTotals();
+  });
+
+  $(document).on('change', '.pay-bank-select', function () {
+    const idx = $(this).data('pay-bank');
+    const val = $(this).val();
+    const order = OrderManager.getActive();
+    if (order && order.payments[idx]) {
+      order.payments[idx].bankId = val ? val.toString().trim() : '';
+      renderPaymentSidebar(); // Cập nhật lại giao diện để hiển thị đúng lựa chọn
+    }
+  });
+
+  // ── Sidebar Metadata Change ───────────────────────────────────────────────
+  $(document).on('change', '#order-employee', function () {
+    const order = OrderManager.getActive();
+    if (order) order.employeeId = $(this).val();
+  });
+
+  $(document).on('input', '#customer-phone', function () {
+    const order = OrderManager.getActive();
+    if (order) {
+      if (!order.customer) order.customer = {};
+      order.customer.phone = $(this).val();
+    }
+  });
+
+  $(document).on('input', '#customer-name', function () {
+    const order = OrderManager.getActive();
+    if (order) {
+      if (!order.customer) order.customer = {};
+      order.customer.name = $(this).val();
+    }
+  });
+
+  $(document).on('input', '#order-birthday', function () {
+    const order = OrderManager.getActive();
+    if (order) order.birthday = $(this).val();
+  });
+
+  $(document).on('input', '#order-rank', function () {
+    const order = OrderManager.getActive();
+    if (order) order.rank = $(this).val();
+  });
+
+  $(document).on('input', '#order-description', function () {
+    const order = OrderManager.getActive();
+    if (order) order.description = $(this).val();
+  });
+
+  $(document).on('change', '#order-vat-invoice', function () {
+    const order = OrderManager.getActive();
+    if (order) order.isVatInvoice = $(this).is(':checked');
+  });
+
+  $(document).on('input', '#order-description', function () {
+    const order = OrderManager.getActive();
+    if (order) order.description = $(this).val();
+  });
+
+  // ── Extended Sidebar Listeners ──────────────────────────────────────────
+  $(document).on('input', '#order-birthday', function () {
+    const order = OrderManager.getActive();
+    if (order) order.birthday = $(this).val();
+  });
+
+  $(document).on('input', '#order-id-number', function () {
+    const order = OrderManager.getActive();
+    if (order) order.idNumber = $(this).val();
+  });
+
+  $(document).on('input', '#quick-qty', function () {
+    const order = OrderManager.getActive();
+    if (order) order.quickQty = Math.max(1, parseInt($(this).val()) || 1);
+  });
+
+  $(document).on('keydown', '#quick-barcode', function (e) {
+    if (e.key === 'Enter') {
+      const barcode = $(this).val().trim();
+      if (!barcode) return;
+
+      const product = _quickProducts.find(p => p.Barcode === barcode || p.ProductCode === barcode);
+      if (product) {
+        const order = OrderManager.getActive();
+        const qty = order.quickQty || 1;
+        for (let i = 0; i < qty; i++) OrderManager.addItem(product, product.Size || 'L');
+        $(this).val('').focus();
+        renderOrderTable();
+        updateTotals();
+        Toast.success(`Đã thêm ${qty} ${product.ProductName}`);
+      } else {
+        Toast.error('Không tìm thấy sản phẩm match với mã: ' + barcode);
+      }
+    }
+  });
+
+  $(document).on('change', '#quick-add-select', function () {
+    const productId = $(this).val();
+    if (!productId) return;
+    const product = _quickProducts.find(p => p.ProductID == productId);
+    if (product) {
+      const order = OrderManager.getActive();
+      const qty = order.quickQty || 1;
+      for (let i = 0; i < qty; i++) OrderManager.addItem(product, product.Size || 'L');
+      $(this).val('');
+      renderOrderTable();
+      updateTotals();
+      Toast.success(`Đã thêm ${qty} ${product.ProductName}`);
+    }
   });
 
   // ── Checkout ───────────────────────────────────────────────────────────────
@@ -754,6 +1011,77 @@ $(function () {
   // ── Print ──────────────────────────────────────────────────────────────────
   $(document).on('click', '#btn-print', function () {
     Toast.show('Đang gửi lệnh in...', '');
+  });
+
+  // ── Customer Modal ─────────────────────────────────────────────────────────
+  $(document).on('click', '#btn-add-customer', async function () {
+    Modal.show('modal-add-customer');
+
+    // Load provinces, employees and groups if empty
+    if ($('#cust-province-select option').length <= 1) {
+      const provinces = await PosService.getProvinces();
+      const pOpts = provinces.map(p => `<option value="${p.LocationID}">${p.LocationName}</option>`).join('');
+      $('#cust-province-select').append(pOpts);
+    }
+    if ($('#cust-employee-select option').length <= 1) {
+      const emps = await PosService.getEmployees();
+      const eOpts = emps.map(e => `<option value="${e.EmployeeID}">${e.EmployeeName}</option>`).join('');
+      $('#cust-employee-select').append(eOpts);
+    }
+    if ($('#cust-group-select option').length <= 1) {
+      const groups = await PosService.getCustomerGroups();
+      const gOpts = groups.map(g => `<option value="${g.ObjectGroupID}">${g.ObjectGroupName}</option>`).join('');
+      $('#cust-group-select').append(gOpts);
+    }
+  });
+
+  $(document).on('click', '#btn-save-customer', async function () {
+    const $form = $('#form-add-customer');
+    const $btn = $(this);
+
+    // Basic validation
+    const name = $form.find('[name="ObjectName"]').val();
+    const phone = $form.find('[name="Phone"]').val();
+    if (!name || !phone) {
+      Toast.error('Vui lòng nhập Tên và Số điện thoại!');
+      return;
+    }
+
+    $btn.prop('disabled', true).text('Đang lưu...');
+
+    try {
+      // Collect data from the form
+      const data = {};
+      $form.serializeArray().forEach(item => {
+        data[item.name] = item.value;
+      });
+
+      const res = await PosService.addCustomer(data);
+
+      if (res.status === 'SUCCESS' || res.success) {
+        Toast.success('✅ Đã thêm khách hàng mới!');
+        Modal.hide('modal-add-customer');
+        $form[0].reset();
+
+        // Tự động chọn khách hàng này cho đơn hàng hiện tại
+        const order = OrderManager.getActive();
+        if (order) {
+          order.customer = {
+            id: res.ObjectID || res.data?.ObjectID,
+            name: name,
+            phone: phone
+          };
+          renderPaymentSidebar(); // Cập nhật sidebar để hiển thị khách đã chọn
+        }
+      } else {
+        throw new Error(res.message || 'Lỗi không xác định');
+      }
+    } catch (e) {
+      console.error(e);
+      Toast.error('❌ Lỗi: ' + e.message);
+    } finally {
+      $btn.prop('disabled', false).text('💾 Lưu');
+    }
   });
 
   // ────────────────────────────────────────────────────────────────────────

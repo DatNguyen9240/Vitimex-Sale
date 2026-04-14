@@ -44,29 +44,8 @@ const AuthService = (() => {
         };
         localStorage.setItem('auth_user', JSON.stringify(basicUser));
 
-        // Gọi API lấy thông tin chi tiết (UserInfo SP) thông qua GET
-        try {
-          const infoRes = await Http.get(EP.USER_INFO);
-          const rows = infoRes.data || infoRes.records || [];
-          if (infoRes && infoRes.code === 0 && rows.length > 0) {
-             // Tìm đúng bản ghi của user hiện tại
-             const detailedUser = rows.find(u => 
-               (u.UserName || u.Username || '').toLowerCase() === username.toLowerCase()
-             );
-             
-             if (detailedUser) {
-               localStorage.setItem('auth_user', JSON.stringify({
-                 ...basicUser,
-                 ...detailedUser,
-                 DisplayName: detailedUser.HoTen || detailedUser.DisplayName || basicUser.DisplayName,
-                 BranchID: detailedUser.BranchID || basicUser.BranchID
-               }));
-             }
-          }
-        } catch (infoErr) {
-          console.warn('[Auth] Could not fetch detailed user info, using basic session data.');
-        }
-
+        localStorage.setItem('auth_user', JSON.stringify(basicUser));
+        
         console.log('[Auth] Login success. User:', username);
         return data;
       } else {

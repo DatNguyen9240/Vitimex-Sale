@@ -40,15 +40,51 @@ window.PosService = (function () {
     try {
       const res = await Http.get(EP.GET_CUSTOMERS, {}, { silent: true });
       const rows = res.data || res.records || [];
-      return rows.map(r => ({
-        id: r.ObjectID,
-        name: r.ObjectName,
-        phone: r.Phone || '', // Assuming SQL might return phone
-        birthDate: r.NgaySinh
-      }));
+      return rows.map(r => {
+        const phone = r.Phone || r.ObjectID || '';
+        let name = r.ObjectName || '';
+        if (!name || name === '-' || name === '?') {
+          name = phone;
+        }
+        return {
+          id: r.ObjectID,
+          name: name,
+          phone: phone,
+          birthday: r.NgaySinh || ''
+        };
+      });
     } catch (e) {
       return [];
     }
+  }
+
+  /** Get customer groups from SQL */
+  async function getCustomerGroups() {
+    try {
+      const res = await Http.get(EP.GET_CUSTOMER_GROUPS, {}, { silent: true });
+      return res.data || res.records || [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /** Get provinces from SQL */
+  async function getProvinces() {
+    try {
+      const res = await Http.get(EP.GET_PROVINCES, {}, { silent: true });
+      return res.data || res.records || [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /** Create a new customer */
+  async function addCustomer(customerData) {
+    const user = AuthService.getUser();
+    return await Http.post(EP.CREATE_CUSTOMER, {
+      ...customerData,
+      UserName: user.UserName || 'admin'
+    });
   }
 
   /** Get branches */
@@ -67,8 +103,8 @@ window.PosService = (function () {
   /** Get employees */
   async function getEmployees() {
     try {
-      const res = await Http.get(EP.GET_EMPLOYEES);
-      return res.data || res.records || [];
+      const res = await Http.get(EP.GET_EMPLOYEES, {}, { silent: true });
+      return res?.data || res?.records || [];
     } catch (e) {
       return [];
     }
@@ -104,8 +140,8 @@ window.PosService = (function () {
   /** Get order statuses */
   async function getOrderStatuses() {
     try {
-      const res = await Http.get(EP.GET_ORDER_STATUSES);
-      const rows = res.data || res.records || [];
+      const res = await Http.get(EP.GET_ORDER_STATUSES, {}, { silent: true });
+      const rows = res?.data || res?.records || [];
       return rows.map(r => ({
         id: r.id || r.ID || '',
         name: r.name || r.Name || ''
@@ -118,10 +154,24 @@ window.PosService = (function () {
   /** Get payment methods */
   async function getPaymentMethods() {
     try {
-      const res = await Http.get(EP.GET_PAYMENT_METHODS);
-      const rows = res.data || res.records || [];
+      const res = await Http.get(EP.GET_PAYMENT_METHODS, {}, { silent: true });
+      const rows = res?.data || res?.records || [];
       return rows.map(r => ({
         id: r.id || r.ID || '',
+        name: r.name || r.Name || ''
+      }));
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /** Get bank list */
+  async function getBanks() {
+    try {
+      const res = await Http.get(EP.GET_BANKS, {}, { silent: true });
+      const rows = res?.data || res?.records || [];
+      return rows.map(r => ({
+        id: (r.id || r.ID || '').toString().trim(),
         name: r.name || r.Name || ''
       }));
     } catch (e) {
@@ -132,10 +182,14 @@ window.PosService = (function () {
   return {
     searchProducts,
     getCustomers,
+    getCustomerGroups,
+    getProvinces,
+    addCustomer,
     getBranches,
     getEmployees,
     saveOrder,
     getOrderStatuses,
-    getPaymentMethods
+    getPaymentMethods,
+    getBanks
   };
 })();

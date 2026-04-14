@@ -8,18 +8,27 @@ const OrderManager = (() => {
 
   // ── Create a new blank order ────────────────────────────────────────────
   function _newOrder(label) {
+    const d = new Date();
     const id = 'order_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5);
     const defLabel = label || ('Đơn hàng ' + (_orders.length + 1));
     return {
       id,
+      voucherNo: 'BH' + d.getFullYear().toString().slice(-2) + (d.getMonth() + 1).toString().padStart(2, '0') + '/' + Math.floor(Math.random() * 9000 + 1000),
+      date: d,
       label: defLabel,
       defaultLabel: defLabel,
       customer: null,
+      employeeId: '',
+      branchName: '',
+      creatorName: '',
+      rank: '',
+      birthday: '',
+      description: '',
+      isVatInvoice: false,
       status: 'HOAN_THANH',
       items: [],          // { product, size, qty, unitPrice, discPct, discAmt, total }
-      note: '',
       payments: [{ methodId: 'TIENMAT', amount: 0 }],
-      createdAt: new Date(),
+      createdAt: d,
     };
   }
 
@@ -107,20 +116,20 @@ const OrderManager = (() => {
 
   function _recalcItem(item) {
     item.subtotal = item.qty * item.unitPrice;
-    item.discAmt  = Math.round(item.subtotal * item.discPct / 100);
-    item.total    = item.subtotal - item.discAmt;
+    item.discAmt = Math.round(item.subtotal * item.discPct / 100);
+    item.total = item.subtotal - item.discAmt;
   }
 
   // ── Bill calculations ───────────────────────────────────────────────────
   function calcOrder(order, opts = {}) {
-    const subtotal  = order.items.reduce((s, i) => s + i.total, 0);
+    const subtotal = order.items.reduce((s, i) => s + i.total, 0);
     const orderDisc = opts.orderDisc || 0;
-    const service   = opts.service   || 0;
-    const vat       = opts.vat       || 0;
-    const vatAmt    = Math.round((subtotal - orderDisc + service) * vat / 100);
-    const total     = subtotal - orderDisc + service + vatAmt;
-    const paid      = order.payments.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
-    const change    = paid - total;  // positive = tiền thừa, negative = nợ
+    const service = opts.service || 0;
+    const vat = opts.vat || 0;
+    const vatAmt = Math.round((subtotal - orderDisc + service) * vat / 100);
+    const total = subtotal - orderDisc + service + vatAmt;
+    const paid = order.payments.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
+    const change = paid - total;  // positive = tiền thừa, negative = nợ
     return { subtotal, orderDisc, service, vat, vatAmt, total, paid, change };
   }
 

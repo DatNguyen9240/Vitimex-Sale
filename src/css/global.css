@@ -239,12 +239,12 @@ html {
 /* ── Toast notification ──────────────────── */
 #toast-container {
   position: fixed;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 16px;
+  right: 16px;
   z-index: 9999;
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
   gap: 8px;
   min-width: 240px;
 }
@@ -270,7 +270,7 @@ html {
 @keyframes toastIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(-10px);
   }
 
   to {
